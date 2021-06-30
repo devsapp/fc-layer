@@ -26,3 +26,13 @@ export interface InputProps {
         configPath: string;
     };
 }
+export interface IProps {
+    region: string;
+    layerName: string;
+    description?: string;
+    code?: string;
+    compatibleRuntime?: string[];
+    prefix?: string;
+    version?: number;
+}
+export declare function isProps(args: any): args is IProps;
