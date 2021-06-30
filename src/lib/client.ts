@@ -47,6 +47,11 @@ FC.prototype.getLayerVersion = async function(layerName, version, headers?) {
 FC.prototype.publishLayerVersion = async function(layerName, body = {}, headers?) {
   return (await Client.fcClient.post(`/layers/${layerName}/versions`, body, headers)).data;
 }
+FC.prototype.deleteLayerVersion = async function(layerName, version, headers?) {
+  const res = await Client.fcClient.delete(`/layers/${layerName}/versions/${version}`, null, headers);
+  logger.debug(`delete version: ${JSON.stringify(res)}`);
+  return res;
+}
 
 export default class Client {
   static fcClient: any;

@@ -192,6 +192,123 @@ export const VERSION_CONFIG = [
   },
 ];
 
+export const DELETE_VERSION = [
+  {
+    header: 'fc-layer deleteVersion',
+    content: 'get layer deleteVersion',
+  },
+  {
+    header: 'Usage',
+    content: '$ s deleteVersion <options>',
+  },
+  {
+    header: 'Command List',
+    optionList: [
+      {
+        name: 'region',
+        description: 'Specify the region parameter',
+        type: String,
+      },
+      {
+        name: 'layer-name',
+        description: 'Specify the layer name parameter',
+        type: String,
+      },
+      {
+        name: 'version',
+        description: 'Specify the version parameter',
+        type: Number,
+      }
+    ],
+  },
+  {
+    header: 'Global Options',
+    optionList: [
+      {
+        name: 'access',
+        description: 'Specify key alias',
+        alias: 'a',
+        type: Boolean,
+      },
+      {
+        name: 'help',
+        description: 'Display help for command',
+        alias: 'h',
+        type: Boolean,
+      },
+    ],
+  },
+  {
+    header: 'Examples with Yaml',
+    content: [
+      '$ s deleteVersion',
+      '$ s exec -- deleteVersion',
+    ],
+  },
+  {
+    header: 'Examples with CLI',
+    content: [
+      '$ s cli fc-layer deleteVersion --region cn-hangzhou --layer-name name --version 1',
+    ],
+  },
+];
+
+export const DELETE_LAYER = [
+  {
+    header: 'fc-layer deleteLayer',
+    content: 'get layer deleteLayer',
+  },
+  {
+    header: 'Usage',
+    content: '$ s deleteLayer <options>',
+  },
+  {
+    header: 'Command List',
+    optionList: [
+      {
+        name: 'region',
+        description: 'Specify the region parameter',
+        type: String,
+      },
+      {
+        name: 'layer-name',
+        description: 'Specify the layer name parameter',
+        type: String,
+      },
+    ],
+  },
+  {
+    header: 'Global Options',
+    optionList: [
+      {
+        name: 'access',
+        description: 'Specify key alias',
+        alias: 'a',
+        type: Boolean,
+      },
+      {
+        name: 'help',
+        description: 'Display help for command',
+        alias: 'h',
+        type: Boolean,
+      },
+    ],
+  },
+  {
+    header: 'Examples with Yaml',
+    content: [
+      '$ s deleteLayer',
+      '$ s exec -- deleteLayer',
+    ],
+  },
+  {
+    header: 'Examples with CLI',
+    content: [
+      '$ s cli fc-layer deleteLayer --region cn-hangzhou --layer-name name',
+    ],
+  },
+];
+
 export const VERSIONS = [
   {
     header: 'fc-layer versions',

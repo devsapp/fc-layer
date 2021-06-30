@@ -81,6 +81,40 @@ export default class ComponentDemo extends BaseComponent {
     return await layer.getVersion({ version: props.version, layerName: props.layerName });
   }
 
+  public async deleteVersion(inputs: InputProps) {
+    const {
+      credentials,
+      help,
+      props,
+    } = await this.handlerInputs(inputs, 'deleteVersion');
+
+    if (help) {
+      core.help(help_constant.DELETE_VERSION);
+      return;
+    }
+    await StdoutFormatter.initStdout();
+
+    const layer = new Layer({ region: props.region, credentials });
+    return await layer.deleteVersion({ version: props.version, layerName: props.layerName });
+  }
+
+  public async deleteLayer(inputs: InputProps) {
+    const {
+      credentials,
+      help,
+      props,
+    } = await this.handlerInputs(inputs, 'deleteLayer');
+
+    if (help) {
+      core.help(help_constant.DELETE_LAYER);
+      return;
+    }
+    await StdoutFormatter.initStdout();
+
+    const layer = new Layer({ region: props.region, credentials });
+    return await layer.deleteLayer({ layerName: props.layerName });
+  }
+
   private async handlerInputs(inputs: InputProps, command: string) {
     logger.debug(`inputs.props: ${JSON.stringify(inputs.props)}`);
 

@@ -109,4 +109,22 @@ export default class Layer {
     logger.info(StdoutFormatter.stdoutFormatter.get('layer version config', `${layerName}.${version}`));
     return await Client.fcClient.getLayerVersion(layerName, version);
   }
+
+  async deleteVersion({ version, layerName }) {
+    if (!version) {
+      throw new Error('Not fount version');
+    }
+    logger.info(StdoutFormatter.stdoutFormatter.remove('layer version', `${layerName}.${version}`));
+    const { data } = await Client.fcClient.deleteLayerVersion(layerName, version);
+    if (data) {
+      logger.error(data);
+    }
+  }
+
+  async deleteLayer({ layerName }) {
+    const versions = await this.versions({ layerName }, false);
+    for (const { version } of versions) {
+      await this.deleteVersion({ version, layerName });
+    }
+  }
 }
