@@ -137,7 +137,7 @@ export default class ComponentDemo extends BaseComponent {
       throw new Error(`Not fount region`);
     }
     const layerName = parsedData['layer-name'] || props.layerName;
-    if (!layerName && command === 'list') {
+    if (!layerName && command !== 'list') {
       throw new Error(`Not fount layerName`);
     }
     let compatibleRuntime = props.compatibleRuntime;
