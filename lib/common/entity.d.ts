@@ -33,6 +33,7 @@ export interface IProps {
     code?: string;
     compatibleRuntime?: string[];
     prefix?: string;
+    assumeYes?: boolean;
     version?: number;
 }
 export declare function isProps(args: any): args is IProps;

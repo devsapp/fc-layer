@@ -19,7 +19,9 @@ export default class Layer {
         version: any;
         layerName: any;
     }): Promise<void>;
-    deleteLayer({ layerName }: {
+    deleteLayer({ layerName, assumeYes }: {
         layerName: any;
+        assumeYes: any;
     }): Promise<void>;
+    private forDeleteVersion;
 }
