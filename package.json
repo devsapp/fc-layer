@@ -34,6 +34,7 @@
     "@serverless-devs/core": "^0.0.*",
     "fs-extra": "^10.0.0",
     "i18n": "^0.13.2",
+    "inquirer": "^8.1.1",
     "js-yaml": "^4.0.0",
     "lodash.get": "^4.4.2",
     "tty-table": "^4.1.3"

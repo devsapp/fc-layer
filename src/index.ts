@@ -112,17 +112,17 @@ export default class ComponentDemo extends BaseComponent {
     await StdoutFormatter.initStdout();
 
     const layer = new Layer({ region: props.region, credentials });
-    return await layer.deleteLayer({ layerName: props.layerName });
+    return await layer.deleteLayer({ layerName: props.layerName, assumeYes: props.assumeYes });
   }
 
   private async handlerInputs(inputs: InputProps, command: string) {
     logger.debug(`inputs.props: ${JSON.stringify(inputs.props)}`);
 
     const parsedArgs: {[key: string]: any} = core.commandParse(inputs, {
-      boolean: ['help', 'table'],
+      boolean: ['help', 'table', 'y'],
       string: ['region', 'layer-name', 'code', 'description', 'compatible-runtime', 'prefix'],
       number: ['version'],
-      alias: { help: 'h' }
+      alias: { help: 'h', 'assume-yes': 'y', }
     });
 
     const parsedData = parsedArgs?.data || {};
@@ -157,6 +157,7 @@ export default class ComponentDemo extends BaseComponent {
       description: parsedData.description || props.description,
       code: parsedData.code || props.code,
       prefix: parsedData.prefix || props.prefix,
+      assumeYes: parsedData.y,
       version,
     }
 

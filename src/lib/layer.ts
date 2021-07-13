@@ -6,6 +6,18 @@ import Client from './client';
 import { IProps } from '../common/entity';
 import StdoutFormatter from '../common/stdout-formatter';
 import logger from '../common/logger';
+import inquirer from 'inquirer';
+
+async function promptForConfirmOrDetails(message: string): Promise<boolean> {
+  const answers: any = await inquirer.prompt([{
+    type: 'list',
+    name: 'prompt',
+    message,
+    choices: ['yes', 'no'],
+  }]);
+
+  return answers.prompt === 'yes';
+}
 
 const COMPATIBLE_RUNTIME = [
   'nodejs12',
@@ -121,8 +133,21 @@ export default class Layer {
     }
   }
 
-  async deleteLayer({ layerName }) {
+  async deleteLayer({ layerName, assumeYes }) {
     const versions = await this.versions({ layerName }, false);
+    if (assumeYes) {
+      await this.forDeleteVersion(layerName, versions);
+    } else {
+      const meg = `Whether to delete all versions of ${layerName}`;
+      tableShow(versions);
+      if (await promptForConfirmOrDetails(meg)) {
+        return await this.forDeleteVersion(layerName, versions);
+      }
+    }
+    
+  }
+
+  private async forDeleteVersion(layerName, versions) {
     for (const { version } of versions) {
       await this.deleteVersion({ version, layerName });
     }
