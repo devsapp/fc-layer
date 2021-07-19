@@ -67,7 +67,7 @@
 						{
 							"fileName": "common/base.ts",
 							"line": 9,
-							"character": 20
+							"character": 17
 						}
 					],
 					"type": {
@@ -97,7 +97,7 @@
 					}
 				},
 				{
-					"id": 46,
+					"id": 49,
 					"name": "__doc",
 					"kind": 2048,
 					"kindString": "Method",
@@ -105,20 +105,20 @@
 					"sources": [
 						{
 							"fileName": "common/base.ts",
-							"line": 34,
-							"character": 9
+							"line": 48,
+							"character": 6
 						}
 					],
 					"signatures": [
 						{
-							"id": 47,
+							"id": 50,
 							"name": "__doc",
 							"kind": 4096,
 							"kindString": "Call signature",
 							"flags": {},
 							"parameters": [
 								{
-									"id": 48,
+									"id": 51,
 									"name": "projectName",
 									"kind": 32768,
 									"kindString": "Parameter",
@@ -147,7 +147,7 @@
 					}
 				},
 				{
-					"id": 44,
+					"id": 47,
 					"name": "__getBasePath",
 					"kind": 2048,
 					"kindString": "Method",
@@ -155,13 +155,13 @@
 					"sources": [
 						{
 							"fileName": "common/base.ts",
-							"line": 21,
-							"character": 17
+							"line": 35,
+							"character": 14
 						}
 					],
 					"signatures": [
 						{
-							"id": 45,
+							"id": 48,
 							"name": "__getBasePath",
 							"kind": 4096,
 							"kindString": "Call signature",
@@ -182,6 +182,56 @@
 					}
 				},
 				{
+					"id": 44,
+					"name": "__report",
+					"kind": 2048,
+					"kindString": "Method",
+					"flags": {
+						"isProtected": true
+					},
+					"sources": [
+						{
+							"fileName": "common/base.ts",
+							"line": 21,
+							"character": 19
+						}
+					],
+					"signatures": [
+						{
+							"id": 45,
+							"name": "__report",
+							"kind": 4096,
+							"kindString": "Call signature",
+							"flags": {},
+							"parameters": [
+								{
+									"id": 46,
+									"name": "reportData",
+									"kind": 32768,
+									"kindString": "Parameter",
+									"flags": {},
+									"type": {
+										"type": "reference",
+										"name": "ReportData"
+									}
+								}
+							],
+							"type": {
+								"type": "reference",
+								"name": "FcLayer"
+							},
+							"inheritedFrom": {
+								"type": "reference",
+								"name": "BaseComponent.__report"
+							}
+						}
+					],
+					"inheritedFrom": {
+						"type": "reference",
+						"name": "BaseComponent.__report"
+					}
+				},
+				{
 					"id": 20,
 					"name": "deleteLayer",
 					"kind": 2048,
@@ -192,7 +242,7 @@
 					"sources": [
 						{
 							"fileName": "index.ts",
-							"line": 101,
+							"line": 106,
 							"character": 26
 						}
 					],
@@ -240,7 +290,7 @@
 					"sources": [
 						{
 							"fileName": "index.ts",
-							"line": 84,
+							"line": 89,
 							"character": 28
 						}
 					],
@@ -288,7 +338,7 @@
 					"sources": [
 						{
 							"fileName": "index.ts",
-							"line": 118,
+							"line": 127,
 							"character": 29
 						}
 					],
@@ -543,7 +593,7 @@
 					"sources": [
 						{
 							"fileName": "index.ts",
-							"line": 32,
+							"line": 37,
 							"character": 19
 						}
 					],
@@ -639,7 +689,7 @@
 					"sources": [
 						{
 							"fileName": "index.ts",
-							"line": 67,
+							"line": 72,
 							"character": 28
 						}
 					],
@@ -687,7 +737,7 @@
 					"sources": [
 						{
 							"fileName": "index.ts",
-							"line": 49,
+							"line": 54,
 							"character": 23
 						}
 					],
@@ -745,7 +795,8 @@
 					"title": "Methods",
 					"kind": 2048,
 					"children": [
-						46,
+						49,
+						47,
 						44,
 						20,
 						17,
