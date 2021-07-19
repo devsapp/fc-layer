@@ -25,8 +25,13 @@ export default class ComponentDemo extends BaseComponent {
     await StdoutFormatter.initStdout();
 
     const layer = new Layer({ region: props.region, credentials });
+    const arn = await layer.publish(props);
+    super.__report({
+      name: 'fc-layer',
+      content: { arn, region: props.region }
+    });
 
-    return await layer.publish(props);
+    return arn;
   }
 
   public async list(inputs: InputProps) {
@@ -112,7 +117,11 @@ export default class ComponentDemo extends BaseComponent {
     await StdoutFormatter.initStdout();
 
     const layer = new Layer({ region: props.region, credentials });
-    return await layer.deleteLayer({ layerName: props.layerName, assumeYes: props.assumeYes });
+    await layer.deleteLayer({ layerName: props.layerName, assumeYes: props.assumeYes });
+    super.__report({
+      name: 'fc-layer',
+      content: { arn: '', region: props.region }
+    });
   }
 
   private async handlerInputs(inputs: InputProps, command: string) {
