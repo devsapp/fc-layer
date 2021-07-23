@@ -130,7 +130,7 @@ export default class ComponentDemo extends BaseComponent {
     const parsedArgs: {[key: string]: any} = core.commandParse(inputs, {
       boolean: ['help', 'table', 'y'],
       string: ['region', 'layer-name', 'code', 'description', 'compatible-runtime', 'prefix'],
-      number: ['version'],
+      number: ['version-id'],
       alias: { help: 'h', 'assume-yes': 'y', }
     });
 
@@ -154,7 +154,7 @@ export default class ComponentDemo extends BaseComponent {
       compatibleRuntime = parsedData['compatible-runtime'].split(',');
     }
 
-    const version = parsedData.version || props.version;
+    const version = parsedData['version-id'] || props.version || props.versionId;
     if (!version && command === 'versionConfig') {
       throw new Error(`Not fount version`);
     }

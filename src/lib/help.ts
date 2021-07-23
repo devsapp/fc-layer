@@ -154,7 +154,7 @@ export const VERSION_CONFIG = [
         type: String,
       },
       {
-        name: 'version',
+        name: 'version-id',
         description: 'Specify the version parameter',
         type: Number,
       }
@@ -187,7 +187,7 @@ export const VERSION_CONFIG = [
   {
     header: 'Examples with CLI',
     content: [
-      '$ s cli fc-layer versionConfig --region cn-hangzhou --layer-name name --version 1',
+      '$ s cli fc-layer versionConfig --region cn-hangzhou --layer-name name --version-id 1',
     ],
   },
 ];
@@ -215,7 +215,7 @@ export const DELETE_VERSION = [
         type: String,
       },
       {
-        name: 'version',
+        name: 'version-id',
         description: 'Specify the version parameter',
         type: Number,
       }
@@ -248,7 +248,7 @@ export const DELETE_VERSION = [
   {
     header: 'Examples with CLI',
     content: [
-      '$ s cli fc-layer deleteVersion --region cn-hangzhou --layer-name name --version 1',
+      '$ s cli fc-layer deleteVersion --region cn-hangzhou --layer-name name --version-id 1',
     ],
   },
 ];
