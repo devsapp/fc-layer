@@ -52,10 +52,6 @@ const tableShow = (data) => {
 }
 
 export default class Layer {
-  constructor({ region, credentials }) {
-    Client.setFcClient(region, credentials);
-  }
-
   async publish(props: IProps) {
     const {
       layerName,

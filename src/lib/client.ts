@@ -1,4 +1,5 @@
 import FC from '@alicloud/fc2';
+import * as core from '@serverless-devs/core';
 import logger from '../common/logger';
 
 FC.prototype.listLayers = async function(query?, headers?) {
@@ -56,7 +57,7 @@ FC.prototype.deleteLayerVersion = async function(layerName, version, headers?) {
 export default class Client {
   static fcClient: any;
 
-  static setFcClient(region: string, credentials) {
+  static async setFcClient(region: string, credentials) {
     const {
       AccountID,
       AccessKeyID,
@@ -65,15 +66,24 @@ export default class Client {
     } = credentials;
 
     const fcClient = new FC(AccountID, {
+      region,
+      endpoint: await this.getFcEndpoint(),
       accessKeyID: AccessKeyID,
       accessKeySecret: AccessKeySecret,
       securityToken: SecurityToken,
-      region,
       timeout: 6000000,
     });
 
     this.fcClient = fcClient;
 
     return fcClient;
+  }
+
+  private static async getFcEndpoint(): Promise<string | undefined> {
+    const fcDefault = await core.loadComponent('devsapp/fc-default');
+    const fcEndpoint: string = await fcDefault.get({ args: 'fc-endpoint' });
+    if (!fcEndpoint) { return undefined; }
+    const enableFcEndpoint: any = await fcDefault.get({ args: 'enable-fc-endpoint' });
+    return (enableFcEndpoint === true || enableFcEndpoint === 'true') ? fcEndpoint : undefined;
   }
 }

@@ -5,6 +5,7 @@ import { InputProps, IProps } from './common/entity';
 import * as help_constant from './lib/help';
 import StdoutFormatter from './common/stdout-formatter';
 import Layer from './lib/layer';
+import Client from './lib/client';
 
 export default class ComponentDemo extends BaseComponent {
   constructor(props) {
@@ -13,7 +14,6 @@ export default class ComponentDemo extends BaseComponent {
 
   public async publish(inputs: InputProps) {
     const {
-      credentials,
       help,
       props,
     } = await this.handlerInputs(inputs, 'publish');
@@ -24,7 +24,7 @@ export default class ComponentDemo extends BaseComponent {
     }
     await StdoutFormatter.initStdout();
 
-    const layer = new Layer({ region: props.region, credentials });
+    const layer = new Layer();
     const arn = await layer.publish(props);
     super.__report({
       name: 'fc-layer',
@@ -36,7 +36,6 @@ export default class ComponentDemo extends BaseComponent {
 
   public async list(inputs: InputProps) {
     const {
-      credentials,
       help,
       props,
       table,
@@ -47,13 +46,12 @@ export default class ComponentDemo extends BaseComponent {
       return;
     }
 
-    const layer = new Layer({ region: props.region, credentials });
+    const layer = new Layer();
     return await layer.list({ prefix: props.prefix }, table);
   }
 
   public async versions(inputs: InputProps) {
     const {
-      credentials,
       help,
       props,
       table,
@@ -65,13 +63,12 @@ export default class ComponentDemo extends BaseComponent {
     }
     await StdoutFormatter.initStdout();
 
-    const layer = new Layer({ region: props.region, credentials });
+    const layer = new Layer();
     return await layer.versions({ layerName: props.layerName }, table);
   }
 
   public async versionConfig(inputs: InputProps) {
     const {
-      credentials,
       help,
       props,
     } = await this.handlerInputs(inputs, 'versionConfig');
@@ -82,13 +79,12 @@ export default class ComponentDemo extends BaseComponent {
     }
     await StdoutFormatter.initStdout();
 
-    const layer = new Layer({ region: props.region, credentials });
+    const layer = new Layer();
     return await layer.getVersion({ version: props.version, layerName: props.layerName });
   }
 
   public async deleteVersion(inputs: InputProps) {
     const {
-      credentials,
       help,
       props,
     } = await this.handlerInputs(inputs, 'deleteVersion');
@@ -99,13 +95,12 @@ export default class ComponentDemo extends BaseComponent {
     }
     await StdoutFormatter.initStdout();
 
-    const layer = new Layer({ region: props.region, credentials });
+    const layer = new Layer();
     return await layer.deleteVersion({ version: props.version, layerName: props.layerName });
   }
 
   public async deleteLayer(inputs: InputProps) {
     const {
-      credentials,
       help,
       props,
     } = await this.handlerInputs(inputs, 'deleteLayer');
@@ -116,7 +111,7 @@ export default class ComponentDemo extends BaseComponent {
     }
     await StdoutFormatter.initStdout();
 
-    const layer = new Layer({ region: props.region, credentials });
+    const layer = new Layer();
     await layer.deleteLayer({ layerName: props.layerName, assumeYes: props.assumeYes });
     super.__report({
       name: 'fc-layer',
@@ -172,6 +167,8 @@ export default class ComponentDemo extends BaseComponent {
 
     const credentials = inputs.credentials || await core.getCredential(inputs.project.access);
     core.reportComponent('fc-layer', { command, uid: credentials.AccountID });
+
+    await Client.setFcClient(region, credentials);
 
     return {
       parsedArgs,
