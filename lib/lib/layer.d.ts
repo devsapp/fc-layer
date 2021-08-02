@@ -1,9 +1,5 @@
 import { IProps } from '../common/entity';
 export default class Layer {
-    constructor({ region, credentials }: {
-        region: any;
-        credentials: any;
-    });
     publish(props: IProps): Promise<any>;
     list({ prefix }: {
         prefix: any;
