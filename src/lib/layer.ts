@@ -80,14 +80,14 @@ export default class Layer {
     fse.removeSync(zipFilePath);
 
     logger.info(StdoutFormatter.stdoutFormatter.create('layer', layerName));
-    const { Arn } = await Client.fcClient.publishLayerVersion(layerName, {
+    const { arn, Arn } = await Client.fcClient.publishLayerVersion(layerName, {
       code: { zipFile },
       description,
       compatibleRuntime,
     });
-    logger.debug(`Arn: ${Arn}`);
+    logger.debug(`Arn: ${arn || Arn}`);
     
-    return Arn;
+    return arn || Arn;
   }
 
   async list({ prefix }, table) {
