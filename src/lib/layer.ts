@@ -30,26 +30,26 @@ const COMPATIBLE_RUNTIME = [
 
 const tableShow = (data) => {
   const options = {
-    borderStyle: "solid",
-    borderColor: "blue",
-    headerAlign: "center",
-    align: "left",
-    color: "cyan",
-    width: "100%"
+    borderStyle: 'solid',
+    borderColor: 'blue',
+    headerAlign: 'center',
+    align: 'left',
+    color: 'cyan',
+    width: '100%',
   };
 
-  const showKey = ['layerName', 'description', 'version', 'compatibleRuntime', 'Arn'];
-  const header = showKey.map(value => ({
+  const showKey = ['layerName', 'description', 'version', 'compatibleRuntime', 'arn'];
+  const header = showKey.map((value) => ({
     value,
-    headerColor: "cyan",
-    color: "cyan",
-    align: "left",
-    width: "auto",
-    formatter: value => value,
+    headerColor: 'cyan',
+    color: 'cyan',
+    align: 'left',
+    width: 'auto',
+    formatter: (v) => v,
   }));
 
   console.log(Table(header, data, options).render());
-}
+};
 
 export default class Layer {
   async publish(props: IProps) {
@@ -67,7 +67,7 @@ export default class Layer {
 
     try {
       fse.emptyDir(zipPath);
-    } catch(ex) {
+    } catch (ex) {
       logger.debug(ex);
     }
 
@@ -80,14 +80,14 @@ export default class Layer {
     fse.removeSync(zipFilePath);
 
     logger.info(StdoutFormatter.stdoutFormatter.create('layer', layerName));
-    const { arn, Arn } = await Client.fcClient.publishLayerVersion(layerName, {
+    const { arn } = await Client.fcClient.publishLayerVersion(layerName, {
       code: { zipFile },
       description,
       compatibleRuntime,
     });
-    logger.debug(`Arn: ${arn || Arn}`);
-    
-    return arn || Arn;
+    logger.debug(`arn: ${arn}`);
+
+    return arn;
   }
 
   async list({ prefix }, table) {
@@ -96,9 +96,15 @@ export default class Layer {
     logger.debug(`layer list: ${JSON.stringify(list)}`);
 
     if (table) {
-      tableShow(list)
+      tableShow(list);
     } else {
-      return list.map(({ layerName, description, version, compatibleRuntime, Arn }) => ({ layerName, Arn, version, description, compatibleRuntime }));
+      return list.map(({
+        layerName,
+        description,
+        version,
+        compatibleRuntime,
+        arn,
+      }) => ({ layerName, arn, version, description, compatibleRuntime }));
     }
   }
 
@@ -109,7 +115,13 @@ export default class Layer {
     if (table) {
       tableShow(versions);
     } else {
-      return versions.map(({ layerName, description, version, compatibleRuntime, Arn }) => ({ layerName, Arn, version, description, compatibleRuntime }));
+      return versions.map(({
+        layerName: ln,
+        description,
+        version,
+        compatibleRuntime,
+        arn,
+      }) => ({ layerName: ln, arn, version, description, compatibleRuntime }));
     }
   }
 
@@ -140,7 +152,6 @@ export default class Layer {
         return await this.forDeleteVersion(layerName, versions);
       }
     }
-    
   }
 
   private async forDeleteVersion(layerName, versions) {

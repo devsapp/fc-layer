@@ -8,11 +8,7 @@ import Layer from './lib/layer';
 import Client from './lib/client';
 
 export default class ComponentDemo extends BaseComponent {
-  constructor(props) {
-    super(props)
-  }
-
-  public async publish(inputs: InputProps) {
+  async publish(inputs: InputProps) {
     const {
       help,
       props,
@@ -28,13 +24,13 @@ export default class ComponentDemo extends BaseComponent {
     const arn = await layer.publish(props);
     super.__report({
       name: 'fc-layer',
-      content: { arn, region: props.region }
+      content: { arn, region: props.region },
     });
 
     return arn;
   }
 
-  public async list(inputs: InputProps) {
+  async list(inputs: InputProps) {
     const {
       help,
       props,
@@ -50,7 +46,7 @@ export default class ComponentDemo extends BaseComponent {
     return await layer.list({ prefix: props.prefix }, table);
   }
 
-  public async versions(inputs: InputProps) {
+  async versions(inputs: InputProps) {
     const {
       help,
       props,
@@ -67,7 +63,7 @@ export default class ComponentDemo extends BaseComponent {
     return await layer.versions({ layerName: props.layerName }, table);
   }
 
-  public async versionConfig(inputs: InputProps) {
+  async versionConfig(inputs: InputProps) {
     const {
       help,
       props,
@@ -83,7 +79,7 @@ export default class ComponentDemo extends BaseComponent {
     return await layer.getVersion({ version: props.version, layerName: props.layerName });
   }
 
-  public async deleteVersion(inputs: InputProps) {
+  async deleteVersion(inputs: InputProps) {
     const {
       help,
       props,
@@ -99,7 +95,7 @@ export default class ComponentDemo extends BaseComponent {
     return await layer.deleteVersion({ version: props.version, layerName: props.layerName });
   }
 
-  public async deleteLayer(inputs: InputProps) {
+  async deleteLayer(inputs: InputProps) {
     const {
       help,
       props,
@@ -115,7 +111,7 @@ export default class ComponentDemo extends BaseComponent {
     await layer.deleteLayer({ layerName: props.layerName, assumeYes: props.assumeYes });
     super.__report({
       name: 'fc-layer',
-      content: { arn: '', region: props.region }
+      content: { arn: '', region: props.region },
     });
   }
 
@@ -126,7 +122,7 @@ export default class ComponentDemo extends BaseComponent {
       boolean: ['help', 'table', 'y'],
       string: ['region', 'layer-name', 'code', 'description', 'compatible-runtime', 'prefix'],
       number: ['version-id'],
-      alias: { help: 'h', 'assume-yes': 'y', }
+      alias: { help: 'h', 'assume-yes': 'y' },
     });
 
     const parsedData = parsedArgs?.data || {};
@@ -138,20 +134,20 @@ export default class ComponentDemo extends BaseComponent {
     const props = inputs.props || {};
     const region = parsedData.region || props.region;
     if (!region) {
-      throw new Error(`Not fount region`);
+      throw new Error('Not fount region');
     }
     const layerName = parsedData['layer-name'] || props.layerName;
     if (!layerName && command !== 'list') {
-      throw new Error(`Not fount layerName`);
+      throw new Error('Not fount layerName');
     }
-    let compatibleRuntime = props.compatibleRuntime;
+    let { compatibleRuntime } = props;
     if (parsedData['compatible-runtime']) {
       compatibleRuntime = parsedData['compatible-runtime'].split(',');
     }
 
     const version = parsedData['version-id'] || props.version || props.versionId;
     if (!version && command === 'versionConfig') {
-      throw new Error(`Not fount version`);
+      throw new Error('Not fount version');
     }
 
     const endProps: IProps = {
@@ -163,9 +159,12 @@ export default class ComponentDemo extends BaseComponent {
       prefix: parsedData.prefix || props.prefix,
       assumeYes: parsedData.y,
       version,
-    }
+    };
 
-    const credentials = inputs.credentials || await core.getCredential(inputs.project.access);
+    let { credentials } = inputs;
+    if (!credentials?.AccessKeyID) {
+      credentials = await core.getCredential(inputs.project.access);
+    }
     core.reportComponent('fc-layer', { command, uid: credentials.AccountID });
 
     await Client.setFcClient(region, credentials);
@@ -175,6 +174,6 @@ export default class ComponentDemo extends BaseComponent {
       credentials,
       props: endProps,
       table: parsedData.table,
-    }
+    };
   }
 }

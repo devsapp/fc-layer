@@ -91,7 +91,7 @@ export const LIST = [
         name: 'prefix',
         description: 'Specify the prefix parameter',
         type: String,
-      }
+      },
     ],
   },
   {
@@ -157,7 +157,7 @@ export const VERSION_CONFIG = [
         name: 'version-id',
         description: 'Specify the version parameter',
         type: Number,
-      }
+      },
     ],
   },
   {
@@ -218,7 +218,7 @@ export const DELETE_VERSION = [
         name: 'version-id',
         description: 'Specify the version parameter',
         type: Number,
-      }
+      },
     ],
   },
   {
