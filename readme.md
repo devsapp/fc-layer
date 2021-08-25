@@ -13,5 +13,3 @@ s cli <componentname> -d
 ### 应用编排使用方式
 
 查看 example下 s.yaml
-
-

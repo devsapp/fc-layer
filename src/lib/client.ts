@@ -2,14 +2,14 @@ import FC from '@alicloud/fc2';
 import * as core from '@serverless-devs/core';
 import logger from '../common/logger';
 
-FC.prototype.listLayers = async function(query?, headers?) {
+FC.prototype.listLayers = async function (query?, headers?) {
   let data = [];
   let hasNextToken = false;
 
   do {
     const res = await Client.fcClient.get('/layers', query, headers);
     logger.debug(`get /laysers res: ${JSON.stringify(res)}`);
-    
+
     const { layers, nextToken } = res.data;
     if (nextToken) {
       query.nextToken = nextToken;
@@ -18,41 +18,41 @@ FC.prototype.listLayers = async function(query?, headers?) {
       hasNextToken = false;
     }
     data = data.concat(layers);
-  } while(hasNextToken);
+  } while (hasNextToken);
 
   return data;
-}
-FC.prototype.listLayerVersions = async function(layerName, headers?) {
+};
+FC.prototype.listLayerVersions = async function (layerName, headers?) {
   let data = [];
   const query = {
     startVersion: 1,
     limit: 50,
-  }
+  };
 
   do {
-    const res = await Client.fcClient.get(`/layers/${layerName}/versions`, query, headers)
+    const res = await Client.fcClient.get(`/layers/${layerName}/versions`, query, headers);
     logger.debug(`get /laysers res: ${JSON.stringify(res)}`);
-    
+
     const { layers, nextVersion } = res.data;
     query.startVersion = nextVersion;
     data = data.concat(layers);
-  } while(query.startVersion);
+  } while (query.startVersion);
 
   return data;
-}
-FC.prototype.getLayerVersion = async function(layerName, version, headers?) {
+};
+FC.prototype.getLayerVersion = async function (layerName, version, headers?) {
   const versionConfig = await Client.fcClient.get(`/layers/${layerName}/versions/${version}`, null, headers);
-  logger.debug(`layers version: ${JSON.stringify(versionConfig)}`)
+  logger.debug(`layers version: ${JSON.stringify(versionConfig)}`);
   return versionConfig.data;
-}
-FC.prototype.publishLayerVersion = async function(layerName, body = {}, headers?) {
+};
+FC.prototype.publishLayerVersion = async function (layerName, body = {}, headers?) {
   return (await Client.fcClient.post(`/layers/${layerName}/versions`, body, headers)).data;
-}
-FC.prototype.deleteLayerVersion = async function(layerName, version, headers?) {
+};
+FC.prototype.deleteLayerVersion = async function (layerName, version, headers?) {
   const res = await Client.fcClient.delete(`/layers/${layerName}/versions/${version}`, null, headers);
   logger.debug(`delete version: ${JSON.stringify(res)}`);
   return res;
-}
+};
 
 export default class Client {
   static fcClient: any;
