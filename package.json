@@ -14,6 +14,7 @@
   "contributors": [],
   "license": "MIT",
   "main": "./lib/index.js",
+  "autoInstall": false,
   "publishConfig": {
     "access": "public"
   },
@@ -25,7 +26,7 @@
     "start": "npm run watch",
     "watch": "tsc -w",
     "prebuild": "rm -rf node_modules && rm -rf package-lock.json && npm i && rimraf lib",
-    "build": "npm run fix && npm run lint && tsc",
+    "build": "npm run fix && npm run lint && ncc build src/index.ts -m -e @serverless-devs/core -o lib",
     "postbuild": "npm run doc",
     "lint": "f2elint scan",
     "fix": "f2elint fix",
@@ -53,7 +54,8 @@
     "ts-jest": "^26.2.0",
     "ts-node": "^8.10.2",
     "typedoc": "^0.20.35",
-    "typescript": "^3.9.7"
+    "typescript": "^3.9.7",
+    "@vercel/ncc": "^0.24.0"
   },
   "jest": {
     "preset": "ts-jest",
