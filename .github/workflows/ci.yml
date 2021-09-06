@@ -29,7 +29,6 @@ jobs:
       - name: NPM run lint
         run: |
           npm run test
-      # - run: export AccountID=${{secrets.ACCOUNTID}} AccessKeyID=${{secrets.ACCESSKEYID}} AccessKeySecret=${{secrets.ACCESSKEYSECRET}}
       - name: NPM run test-integration
         env:
           AccountID: ${{secrets.ACCOUNTID}}
