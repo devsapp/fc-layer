@@ -134,11 +134,11 @@ export default class ComponentDemo extends BaseComponent {
     const props = inputs.props || {};
     const region = parsedData.region || props.region;
     if (!region) {
-      throw new Error('Not fount region');
+      throw new Error('Not found region');
     }
     const layerName = parsedData['layer-name'] || props.layerName;
     if (!layerName && command !== 'list') {
-      throw new Error('Not fount layerName');
+      throw new Error('Not found layerName');
     }
     let { compatibleRuntime } = props;
     if (parsedData['compatible-runtime']) {
@@ -147,7 +147,7 @@ export default class ComponentDemo extends BaseComponent {
 
     const version = parsedData['version-id'] || props.version || props.versionId;
     if (!version && command === 'versionConfig') {
-      throw new Error('Not fount version');
+      throw new Error('Not found version');
     }
 
     const endProps: IProps = {
