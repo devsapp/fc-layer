@@ -59,7 +59,6 @@ export const PUBLISH = [
     header: 'Examples with Yaml',
     content: [
       '$ s publish',
-      '$ s exec -- publish',
     ],
   },
   {
@@ -120,7 +119,6 @@ export const LIST = [
     header: 'Examples with Yaml',
     content: [
       '$ s list',
-      '$ s exec -- list',
     ],
   },
   {
@@ -133,12 +131,12 @@ export const LIST = [
 
 export const VERSION_CONFIG = [
   {
-    header: 'fc-layer versionConfig',
-    content: 'get layer versionConfig',
+    header: 'fc-layer detail',
+    content: 'get layer detail',
   },
   {
     header: 'Usage',
-    content: '$ s versionConfig <options>',
+    content: '$ s detail <options>',
   },
   {
     header: 'Command List',
@@ -180,14 +178,13 @@ export const VERSION_CONFIG = [
   {
     header: 'Examples with Yaml',
     content: [
-      '$ s versionConfig',
-      '$ s exec -- versionConfig',
+      '$ s detail',
     ],
   },
   {
     header: 'Examples with CLI',
     content: [
-      '$ s cli fc-layer versionConfig --region cn-hangzhou --layer-name name --version-id 1',
+      '$ s cli fc-layer detail --region cn-hangzhou --layer-name name --version-id 1',
     ],
   },
 ];
@@ -242,7 +239,6 @@ export const DELETE_VERSION = [
     header: 'Examples with Yaml',
     content: [
       '$ s deleteVersion',
-      '$ s exec -- deleteVersion',
     ],
   },
   {
@@ -298,7 +294,6 @@ export const DELETE_LAYER = [
     header: 'Examples with Yaml',
     content: [
       '$ s deleteLayer',
-      '$ s exec -- deleteLayer',
     ],
   },
   {
@@ -359,7 +354,6 @@ export const VERSIONS = [
     header: 'Examples with Yaml',
     content: [
       '$ s versions',
-      '$ s exec -- versions',
     ],
   },
   {
