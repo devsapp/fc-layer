@@ -63,11 +63,11 @@ export default class ComponentDemo extends BaseComponent {
     return await layer.versions({ layerName: props.layerName }, table);
   }
 
-  async versionConfig(inputs: InputProps) {
+  async detail(inputs: InputProps) {
     const {
       help,
       props,
-    } = await this.handlerInputs(inputs, 'versionConfig');
+    } = await this.handlerInputs(inputs, 'detail');
 
     if (help) {
       core.help(help_constant.VERSION_CONFIG);
@@ -77,6 +77,10 @@ export default class ComponentDemo extends BaseComponent {
 
     const layer = new Layer();
     return await layer.getVersion({ version: props.version, layerName: props.layerName });
+  }
+
+  async versionConfig(inputs: InputProps) {
+    return await this.detail(inputs);
   }
 
   async deleteVersion(inputs: InputProps) {
@@ -134,11 +138,11 @@ export default class ComponentDemo extends BaseComponent {
     const props = inputs.props || {};
     const region = parsedData.region || props.region;
     if (!region) {
-      throw new Error('Not found region');
+      throw new Error('The parameter region was not found, please use --region to specify');
     }
     const layerName = parsedData['layer-name'] || props.layerName;
     if (!layerName && command !== 'list') {
-      throw new Error('Not found layerName');
+      throw new Error('The parameter layerName was not found, please use --layer-name to specify');
     }
     let { compatibleRuntime } = props;
     if (parsedData['compatible-runtime']) {
@@ -146,8 +150,8 @@ export default class ComponentDemo extends BaseComponent {
     }
 
     const version = parsedData['version-id'] || props.version || props.versionId;
-    if (!version && command === 'versionConfig') {
-      throw new Error('Not found version');
+    if (!version && command === 'detail') {
+      throw new Error('The parameter version was not found, please use --version-id to specify');
     }
 
     const endProps: IProps = {
@@ -161,17 +165,11 @@ export default class ComponentDemo extends BaseComponent {
       version,
     };
 
-    let { credentials } = inputs;
-    if (!credentials?.AccessKeyID) {
-      credentials = await core.getCredential(inputs.project.access);
-    }
-    core.reportComponent('fc-layer', { command, uid: credentials.AccountID });
-
-    await Client.setFcClient(region, credentials);
+    await Client.setFcClient(region, inputs.credentials, inputs.project.access);
+    core.reportComponent('fc-layer', { command, uid: Client.fcClient?.accountid });
 
     return {
       parsedArgs,
-      credentials,
       props: endProps,
       table: parsedData.table,
     };

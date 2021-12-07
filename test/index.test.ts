@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import path from 'path';
 import ComponentStarter from '../src/index';
-import sinon from 'sinon';
+import Client from '../src/lib/client';
 import FC from '@alicloud/fc2';
 import fs from 'fs-extra';
 
@@ -26,8 +26,6 @@ const inputs = {
 };
 
 describe('test/index.test.ts', () => {
-  const sandbox = sinon.createSandbox();
-
   const listLayersRes = [
     {
       "compatibleRuntime": [
@@ -49,34 +47,60 @@ describe('test/index.test.ts', () => {
       "version": "2"
     },
   ];
+  let componentStarter;
 
-  beforeAll(() => {
-    sandbox.stub(FC.prototype, 'publishLayerVersion').resolves({
-      arn: "dcd6a873f4f5adf7ad3375ddac7171ec#layer#1",
+  beforeEach(async () => {
+    const fcClient = new FC(inputs.credentials.AccountID, {
+      accessKeyID: inputs.credentials.AccessKeyID,
+      accessKeySecret: inputs.credentials.AccessKeySecret,
+      region: 'cn-shenzhen',
     });
-    sandbox.stub(FC.prototype, 'listLayers').resolves(listLayersRes);
-    sandbox.stub(FC.prototype, 'listLayerVersions').resolves([
-      {
-        layerName: "layer",
-        description: "",
-        version: "1",
-        compatibleRuntime: [
-          "nodejs12",
-          "nodejs10",
-        ],
-        arn: "dcd6a873f4f5adf7ad3375ddac7171ec#layer#1",
+    fcClient.publishLayerVersion = () => ({ data: { arn: "dcd6a873f4f5adf7ad3375ddac7171ec#layer#1" } });
+    // fcClient.listLayers = () => ({ data: { layers: listLayersRes, } });
+    // fcClient.listLayerVersions = () => ({
+    //   data: { layers: [
+    //     {
+    //       layerName: "layer",
+    //       description: "",
+    //       version: "1",
+    //       compatibleRuntime: [
+    //         "nodejs12",
+    //         "nodejs10",
+    //       ],
+    //       arn: "dcd6a873f4f5adf7ad3375ddac7171ec#layer#1",
+    //     },
+    // ]}});
+    fcClient.getLayerVersion = () => ({ data: { arn: "dcd6a873f4f5adf7ad3375ddac7171ec#layer#1" } });
+    fcClient.deleteLayerVersion = () => ({ data: "" });
+    fcClient.get_all_list_data = (path) => {
+      console.log('path:: ', path);
+      if (path === '/layers') {
+        return {
+          data: { layers: [
+            {
+              layerName: "layer",
+              description: "",
+              version: "1",
+              compatibleRuntime: [
+                "nodejs12",
+                "nodejs10",
+              ],
+              arn: "dcd6a873f4f5adf7ad3375ddac7171ec#layer#1",
+            },
+        ]}};
       }
-    ]);
-    sandbox.stub(FC.prototype, 'getLayerVersion').resolves({
-      arn: "dcd6a873f4f5adf7ad3375ddac7171ec#layer#1",
+      return { data: { layers: listLayersRes, } };
+    };
+
+
+    Client.setFcClient = jest.fn().mockImplementation(() => {
+      Client.fcClient = fcClient;
+      return fcClient;
     });
-    sandbox.stub(FC.prototype, 'deleteLayerVersion').resolves({
-      data: "",
-    });
+    componentStarter = new ComponentStarter();
   });
 
   afterAll(() => {
-    sandbox.restore();
     fs.removeSync(path.join(process.cwd(), '.s'));
   });
 
@@ -84,7 +108,6 @@ describe('test/index.test.ts', () => {
     const inp = _.cloneDeep(inputs);
     inp.args = '--region cn-shenzhen --prefix layer';
 
-    const componentStarter = new ComponentStarter();
     const result = await componentStarter.list(inp);
 
     expect(result).toMatchObject([
@@ -99,7 +122,6 @@ describe('test/index.test.ts', () => {
       region: 'cn-shenzhen',
     };
 
-    const componentStarter = new ComponentStarter();
     const result = await componentStarter.list(inp);
     expect(result).toMatchObject([
       { "layerName": "layer" },
@@ -115,7 +137,6 @@ describe('test/index.test.ts', () => {
       code: path.join(__dirname, 'test.zip'),
     };
 
-    const componentStarter = new ComponentStarter();
     const result = await componentStarter.publish(inp);
     expect(result).toMatch(/#layer#/);
   });
@@ -127,7 +148,6 @@ describe('test/index.test.ts', () => {
       layerName: 'layer',
     };
 
-    const componentStarter = new ComponentStarter();
     const result = await componentStarter.versions(inp);
     expect(result).toMatchObject([{ "layerName": "layer" }]);
   });
@@ -140,7 +160,6 @@ describe('test/index.test.ts', () => {
       versionId: '1',
     };
 
-    const componentStarter = new ComponentStarter();
     const result = await componentStarter.versionConfig(inp);
     expect(result?.arn || '').toMatch(/#layer#/);
   });
@@ -153,7 +172,6 @@ describe('test/index.test.ts', () => {
       versionId: '1',
     };
 
-    const componentStarter = new ComponentStarter();
     const result = await componentStarter.deleteVersion(inp);
     expect(result).toBeUndefined();
   });
@@ -166,7 +184,6 @@ describe('test/index.test.ts', () => {
     };
     inp.args = '-y';
 
-    const componentStarter = new ComponentStarter();
     const result = await componentStarter.deleteLayer(inp);
     expect(result).toBeUndefined();
   });

@@ -80,19 +80,19 @@ export default class Layer {
     fse.removeSync(zipFilePath);
 
     logger.info(StdoutFormatter.stdoutFormatter.create('layer', layerName));
-    const { arn } = await Client.fcClient.publishLayerVersion(layerName, {
+    const { data } = await Client.fcClient.publishLayerVersion(layerName, {
       code: { zipFile },
       description,
       compatibleRuntime,
     });
-    logger.debug(`arn: ${arn}`);
+    logger.debug(`arn: ${data?.arn}`);
 
-    return arn;
+    return data?.arn;
   }
 
   async list({ prefix }, table) {
     logger.info('Getting layer list');
-    const list = await Client.fcClient.listLayers({ prefix });
+    const list = await Client.fcClient.get_all_list_data('/layers', 'layers', { prefix });
     logger.debug(`layer list: ${JSON.stringify(list)}`);
 
     if (table) {
@@ -110,7 +110,7 @@ export default class Layer {
 
   async versions({ layerName }, table) {
     logger.info(StdoutFormatter.stdoutFormatter.get('layer versions', layerName));
-    const versions = await Client.fcClient.listLayerVersions(layerName);
+    const versions = await Client.fcClient.get_all_list_data(`/layers/${layerName}/versions`, 'layers');
 
     if (table) {
       tableShow(versions);
@@ -127,7 +127,7 @@ export default class Layer {
 
   async getVersion({ version, layerName }) {
     logger.info(StdoutFormatter.stdoutFormatter.get('layer version config', `${layerName}.${version}`));
-    return await Client.fcClient.getLayerVersion(layerName, version);
+    return (await Client.fcClient.getLayerVersion(layerName, version))?.data;
   }
 
   async deleteVersion({ version, layerName }) {

@@ -10,7 +10,7 @@ Commands:
   publish: 发布层和层的版本
   list: 获取层的列表
   versions: 获取层的版本列表
-  versionConfig: 获取层版本的配置
+  detail: 获取层版本的配置
   deleteVersion: 删除层的指定版本
   deleteLayer: 删除层
 Properties:
