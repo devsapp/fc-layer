@@ -17,8 +17,12 @@ package-lock.json
 .env
 
 README.md
-./examples
+./jest.config.ts
+./jest.setup.ts
+./example
+./github
 ./coverage
+./src
 ./test
 ./Makefile
 ./f2elint.config.js
