@@ -4,7 +4,7 @@ import Table from 'tty-table';
 import path from 'path';
 import Client from './client';
 import { IProps } from '../common/entity';
-import StdoutFormatter from '../common/stdout-formatter';
+import * as fcCore from '@serverless-devs/fc-core';
 import logger from '../common/logger';
 import inquirer from 'inquirer';
 
@@ -79,7 +79,7 @@ export default class Layer {
     const zipFile = fse.readFileSync(zipFilePath, 'base64');
     fse.removeSync(zipFilePath);
 
-    logger.info(StdoutFormatter.stdoutFormatter.create('layer', layerName));
+    logger.info(fcCore.formatterOutput.create('layer', layerName));
     const { data } = await Client.fcClient.publishLayerVersion(layerName, {
       code: { zipFile },
       description,
@@ -109,7 +109,7 @@ export default class Layer {
   }
 
   async versions({ layerName }, table) {
-    logger.info(StdoutFormatter.stdoutFormatter.get('layer versions', layerName));
+    logger.info(fcCore.formatterOutput.get('layer versions', layerName));
     const versions = await Client.fcClient.get_all_list_data(`/layers/${layerName}/versions`, 'layers');
 
     if (table) {
@@ -126,7 +126,7 @@ export default class Layer {
   }
 
   async getVersion({ version, layerName }) {
-    logger.info(StdoutFormatter.stdoutFormatter.get('layer version config', `${layerName}.${version}`));
+    logger.info(fcCore.formatterOutput.get('layer version config', `${layerName}.${version}`));
     return (await Client.fcClient.getLayerVersion(layerName, version))?.data;
   }
 
@@ -134,7 +134,7 @@ export default class Layer {
     if (!version) {
       throw new Error('Not fount version');
     }
-    logger.info(StdoutFormatter.stdoutFormatter.remove('layer version', `${layerName}.${version}`));
+    logger.info(fcCore.formatterOutput.remove('layer version', `${layerName}.${version}`));
     const { data } = await Client.fcClient.deleteLayerVersion(layerName, version);
     if (data) {
       logger.error(data);

@@ -3,7 +3,6 @@ import BaseComponent from './common/base';
 import logger from './common/logger';
 import { InputProps, IProps } from './common/entity';
 import * as help_constant from './lib/help';
-import StdoutFormatter from './common/stdout-formatter';
 import Layer from './lib/layer';
 import Client from './lib/client';
 
@@ -18,7 +17,7 @@ export default class ComponentDemo extends BaseComponent {
       core.help(help_constant.PUBLISH);
       return;
     }
-    await StdoutFormatter.initStdout();
+  
 
     const layer = new Layer();
     const arn = await layer.publish(props);
@@ -57,7 +56,7 @@ export default class ComponentDemo extends BaseComponent {
       core.help(help_constant.VERSIONS);
       return;
     }
-    await StdoutFormatter.initStdout();
+  
 
     const layer = new Layer();
     return await layer.versions({ layerName: props.layerName }, table);
@@ -73,7 +72,7 @@ export default class ComponentDemo extends BaseComponent {
       core.help(help_constant.VERSION_CONFIG);
       return;
     }
-    await StdoutFormatter.initStdout();
+  
 
     const layer = new Layer();
     return await layer.getVersion({ version: props.version, layerName: props.layerName });
@@ -93,7 +92,7 @@ export default class ComponentDemo extends BaseComponent {
       core.help(help_constant.DELETE_VERSION);
       return;
     }
-    await StdoutFormatter.initStdout();
+  
 
     const layer = new Layer();
     return await layer.deleteVersion({ version: props.version, layerName: props.layerName });
@@ -109,7 +108,7 @@ export default class ComponentDemo extends BaseComponent {
       core.help(help_constant.DELETE_LAYER);
       return;
     }
-    await StdoutFormatter.initStdout();
+  
 
     const layer = new Layer();
     await layer.deleteLayer({ layerName: props.layerName, assumeYes: props.assumeYes });
