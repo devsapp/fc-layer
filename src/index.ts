@@ -119,7 +119,7 @@ export default class ComponentDemo extends BaseComponent {
       props,
     } = await this.handlerInputs(inputs, 'download');
     const { version, layerName, region } = props;
-    if (help) { return {} }
+    if (help) { return {}; }
 
     const layer = new Layer();
     return await layer.download({ layerName, version, region });
