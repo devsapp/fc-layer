@@ -170,7 +170,7 @@ export default class ComponentDemo extends BaseComponent {
       version,
     };
 
-    await Client.setFcClient(region, inputs.credentials, inputs.project.access);
+    await Client.setFcClient(region, inputs.credentials, inputs.project?.access);
 
     return {
       parsedArgs,

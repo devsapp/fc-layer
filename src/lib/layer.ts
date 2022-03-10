@@ -153,7 +153,7 @@ export default class Layer {
       throw new CatchableError('Down load layer version and layerName is must');
     }
 
-    const localDir = path.join(getRootHome(), 'cache', 'layers', `${region}-${layerName}`);
+    const localDir = path.join(getRootHome(), 'cache', 'layers', `${Client.fcClient.accountid}-${region}-${layerName}`);
     const filename = `${version}.zip`;
     const localPath = path.join(localDir, filename);
     if (await fse.exists(localPath)) {
