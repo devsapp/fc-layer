@@ -1,10 +1,8 @@
-import { zip } from '@serverless-devs/core';
-import fse from 'fs-extra';
+import { zip, lodash, CatchableError, downloadRequest, getRootHome, fse } from '@serverless-devs/core';
 import Table from 'tty-table';
 import path from 'path';
 import Client from './client';
 import { IProps } from '../common/entity';
-import StdoutFormatter from '../common/stdout-formatter';
 import logger from '../common/logger';
 import inquirer from 'inquirer';
 
@@ -79,7 +77,6 @@ export default class Layer {
     const zipFile = fse.readFileSync(zipFilePath, 'base64');
     fse.removeSync(zipFilePath);
 
-    logger.info(StdoutFormatter.stdoutFormatter.create('layer', layerName));
     const { data } = await Client.fcClient.publishLayerVersion(layerName, {
       code: { zipFile },
       description,
@@ -109,7 +106,6 @@ export default class Layer {
   }
 
   async versions({ layerName }, table) {
-    logger.info(StdoutFormatter.stdoutFormatter.get('layer versions', layerName));
     const versions = await Client.fcClient.get_all_list_data(`/layers/${layerName}/versions`, 'layers');
 
     if (table) {
@@ -126,7 +122,6 @@ export default class Layer {
   }
 
   async getVersion({ version, layerName }) {
-    logger.info(StdoutFormatter.stdoutFormatter.get('layer version config', `${layerName}.${version}`));
     return (await Client.fcClient.getLayerVersion(layerName, version))?.data;
   }
 
@@ -134,7 +129,6 @@ export default class Layer {
     if (!version) {
       throw new Error('Not fount version');
     }
-    logger.info(StdoutFormatter.stdoutFormatter.remove('layer version', `${layerName}.${version}`));
     const { data } = await Client.fcClient.deleteLayerVersion(layerName, version);
     if (data) {
       logger.error(data);
@@ -152,6 +146,25 @@ export default class Layer {
         return await this.forDeleteVersion(layerName, versions);
       }
     }
+  }
+
+  async download({ version, layerName, region }) {
+    if (lodash.isNil(version) || lodash.isNil(layerName)) {
+      throw new CatchableError('Down load layer version and layerName is must');
+    }
+
+    const localDir = path.join(getRootHome(), 'cache', 'layers', `${region}-${layerName}`);
+    const filename = `${version}.zip`;
+    const localPath = path.join(localDir, filename);
+    if (await fse.exists(localPath)) {
+      logger.debug('The code already exists locally, skip the download');
+      return localPath;
+    }
+
+    const { code } = await this.getVersion({ version, layerName });
+    const codeUrl = code.location.replace('-internal.aliyuncs.com', '.aliyuncs.com');
+    await downloadRequest(codeUrl, localDir, { filename });
+    return localPath;
   }
 
   private async forDeleteVersion(layerName, versions) {
