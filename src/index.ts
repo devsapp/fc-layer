@@ -3,7 +3,6 @@ import BaseComponent from './common/base';
 import logger from './common/logger';
 import { InputProps, IProps } from './common/entity';
 import * as help_constant from './lib/help';
-import StdoutFormatter from './common/stdout-formatter';
 import Layer from './lib/layer';
 import Client from './lib/client';
 
@@ -18,7 +17,6 @@ export default class ComponentDemo extends BaseComponent {
       core.help(help_constant.PUBLISH);
       return;
     }
-    await StdoutFormatter.initStdout();
 
     const layer = new Layer();
     const arn = await layer.publish(props);
@@ -57,7 +55,6 @@ export default class ComponentDemo extends BaseComponent {
       core.help(help_constant.VERSIONS);
       return;
     }
-    await StdoutFormatter.initStdout();
 
     const layer = new Layer();
     return await layer.versions({ layerName: props.layerName }, table);
@@ -73,7 +70,6 @@ export default class ComponentDemo extends BaseComponent {
       core.help(help_constant.VERSION_CONFIG);
       return;
     }
-    await StdoutFormatter.initStdout();
 
     const layer = new Layer();
     return await layer.getVersion({ version: props.version, layerName: props.layerName });
@@ -93,7 +89,6 @@ export default class ComponentDemo extends BaseComponent {
       core.help(help_constant.DELETE_VERSION);
       return;
     }
-    await StdoutFormatter.initStdout();
 
     const layer = new Layer();
     return await layer.deleteVersion({ version: props.version, layerName: props.layerName });
@@ -109,7 +104,6 @@ export default class ComponentDemo extends BaseComponent {
       core.help(help_constant.DELETE_LAYER);
       return;
     }
-    await StdoutFormatter.initStdout();
 
     const layer = new Layer();
     await layer.deleteLayer({ layerName: props.layerName, assumeYes: props.assumeYes });
@@ -117,6 +111,18 @@ export default class ComponentDemo extends BaseComponent {
       name: 'fc-layer',
       content: { arn: '', region: props.region },
     });
+  }
+
+  async download(inputs: InputProps) {
+    const {
+      help,
+      props,
+    } = await this.handlerInputs(inputs, 'download');
+    const { version, layerName, region } = props;
+    if (help) { return {}; }
+
+    const layer = new Layer();
+    return await layer.download({ layerName, version, region });
   }
 
   private async handlerInputs(inputs: InputProps, command: string) {
@@ -131,7 +137,6 @@ export default class ComponentDemo extends BaseComponent {
 
     const parsedData = parsedArgs?.data || {};
     if (parsedData.help) {
-      core.reportComponent('fc-layer', { command, uid: inputs.credentials?.AccountID || '' });
       return { help: true };
     }
 
@@ -150,7 +155,7 @@ export default class ComponentDemo extends BaseComponent {
     }
 
     const version = parsedData['version-id'] || props.version || props.versionId;
-    if (!version && command === 'detail') {
+    if (!version && (command === 'detail' || command === 'download')) {
       throw new Error('The parameter version was not found, please use --version-id to specify');
     }
 
@@ -165,8 +170,7 @@ export default class ComponentDemo extends BaseComponent {
       version,
     };
 
-    await Client.setFcClient(region, inputs.credentials, inputs.project.access);
-    core.reportComponent('fc-layer', { command, uid: Client.fcClient?.accountid });
+    await Client.setFcClient(region, inputs.credentials, inputs.project?.access);
 
     return {
       parsedArgs,
