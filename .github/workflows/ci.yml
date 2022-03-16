@@ -29,10 +29,10 @@ jobs:
       # - name: NPM run test
       #   run: |
       #     npm run test
-      - name: NPM run test-integration
-        env:
-          AccountID: ${{secrets.ACCOUNTID}}
-          AccessKeyID: ${{secrets.ACCESSKEYID}}
-          AccessKeySecret: ${{secrets.ACCESSKEYSECRET}}
-        run: |
-          npm run test-integration
+      # - name: NPM run test-integration
+      #   env:
+      #     AccountID: ${{secrets.ACCOUNTID}}
+      #     AccessKeyID: ${{secrets.ACCESSKEYID}}
+      #     AccessKeySecret: ${{secrets.ACCESSKEYSECRET}}
+      #   run: |
+      #     npm run test-integration
