@@ -1,7 +1,8 @@
-import { zip, lodash, CatchableError, downloadRequest, getRootHome, fse } from '@serverless-devs/core';
+import { lodash, CatchableError, downloadRequest, getRootHome, fse } from '@serverless-devs/core';
 import Table from 'tty-table';
 import path from 'path';
 import Client from './client';
+import { zipCodeFile } from './make-code';
 import { IProps } from '../common/entity';
 import logger from '../common/logger';
 import inquirer from 'inquirer';
@@ -18,12 +19,16 @@ async function promptForConfirmOrDetails(message: string): Promise<boolean> {
 }
 
 const COMPATIBLE_RUNTIME = [
+  'custom',
+  'nodejs14',
   'nodejs12',
   'nodejs10',
   'nodejs8',
   'nodejs6',
   'python3',
   'python2.7',
+  'python3.9',
+  'go1',
 ];
 
 const tableShow = (data) => {
@@ -55,30 +60,25 @@ export default class Layer {
       layerName,
       code = '.',
       description = '',
+      ossBucket,
+      ossKey,
       compatibleRuntime = COMPATIBLE_RUNTIME,
     } = props;
-    const codeResolvePath = path.resolve(code);
 
-    const zipPath = path.join(process.cwd(), '.s', 'layer');
-    const outputFileName = `catch-${new Date().getTime()}.zip`;
-    const zipFilePath = path.join(zipPath, outputFileName);
+    const codeConfig: any = {};
 
-    try {
-      fse.emptyDir(zipPath);
-    } catch (ex) {
-      logger.debug(ex);
+    if (ossBucket || ossKey) {
+      if (lodash.isNil(ossBucket) || lodash.isNil(ossKey)) {
+        throw new CatchableError(`Through the OSS publishing layer, both ossBucket and ossKey must be passed. ossBucket incoming ${ossBucket}, OSSKey incoming ${ossKey}`);
+      }
+      codeConfig.ossBucketName = ossBucket;
+      codeConfig.ossObjectName = ossKey;
+    } else {
+      codeConfig.zipFile = await zipCodeFile(code);
     }
 
-    await zip({
-      codeUri: codeResolvePath,
-      outputFilePath: zipPath,
-      outputFileName,
-    });
-    const zipFile = fse.readFileSync(zipFilePath, 'base64');
-    fse.removeSync(zipFilePath);
-
     const { data } = await Client.fcClient.publishLayerVersion(layerName, {
-      code: { zipFile },
+      code: codeConfig,
       description,
       compatibleRuntime,
     });
@@ -166,7 +166,7 @@ export default class Layer {
     await downloadRequest(codeUrl, localDir, { filename });
     return localPath;
   }
-
+  // s layer publish --layer-name test --ossBucket cn-shenzhen-images --ossKey fc-api-js.zip
   private async forDeleteVersion(layerName, versions) {
     for (const { version } of versions) {
       await this.deleteVersion({ version, layerName });
