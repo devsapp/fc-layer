@@ -128,7 +128,7 @@ export default class ComponentDemo extends BaseComponent {
   private async handlerInputs(inputs: InputProps, command: string) {
     logger.debug(`inputs.props: ${JSON.stringify(inputs.props)}`);
 
-    const parsedArgs: {[key: string]: any} = core.commandParse(inputs, {
+    const parsedArgs: { [key: string]: any } = core.commandParse(inputs, {
       boolean: ['help', 'table', 'y'],
       string: ['region', 'layer-name', 'code', 'description', 'compatible-runtime', 'prefix'],
       number: ['version-id'],
@@ -168,6 +168,8 @@ export default class ComponentDemo extends BaseComponent {
       prefix: parsedData.prefix || props.prefix,
       assumeYes: parsedData.y,
       version,
+      ossBucket: parsedData.ossBucket || props.ossBucket,
+      ossKey: parsedData.ossKey || props.ossKey,
     };
 
     await Client.setFcClient(region, inputs.credentials, inputs.project?.access);

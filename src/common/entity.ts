@@ -23,6 +23,8 @@ export interface InputProps {
 
 export interface IProps {
   region: string;
+  ossKey?: string;
+  ossBucket?: string;
   layerName: string;
   description?: string;
   code?: string;
