@@ -1,4 +1,4 @@
-import { lodash, CatchableError, downloadRequest, getRootHome, fse } from '@serverless-devs/core';
+import { lodash, CatchableError, spinner, downloadRequest, getRootHome, fse } from '@serverless-devs/core';
 import Table from 'tty-table';
 import path from 'path';
 import Client from './client';
@@ -6,6 +6,7 @@ import { zipCodeFile } from './make-code';
 import { IProps } from '../common/entity';
 import logger from '../common/logger';
 import inquirer from 'inquirer';
+import { putOss } from './oss';
 
 async function promptForConfirmOrDetails(message: string): Promise<boolean> {
   const answers: any = await inquirer.prompt([{
@@ -64,8 +65,7 @@ export default class Layer {
       ossKey,
       compatibleRuntime = COMPATIBLE_RUNTIME,
     } = props;
-
-    const codeConfig: any = {};
+    let codeConfig: any = {};
 
     if (ossBucket || ossKey) {
       if (lodash.isNil(ossBucket) || lodash.isNil(ossKey)) {
@@ -73,18 +73,50 @@ export default class Layer {
       }
       codeConfig.ossBucketName = ossBucket;
       codeConfig.ossObjectName = ossKey;
+      logger.debug(`upload oss: ${JSON.stringify(codeConfig)}`);
     } else {
-      codeConfig.zipFile = await zipCodeFile(code);
+      const codeVm = spinner('zip code...');
+      try {
+        const { size, content, zipFilePath } = await zipCodeFile(code);
+        if (size < 52428800) {
+          logger.debug(`upload base64: ${size}`);
+          codeConfig.zipFile = content;
+        } else {
+          const { data: { CodeSizeLimit } } = await Client.fcClient.getAccountConfigs({ config: ['CodeSizeLimit'] });
+          if (size > CodeSizeLimit) {
+            throw new Error(`the size of file ${size} could not greater than ${CodeSizeLimit}`);
+          }
+          codeVm.text = 'push to oss...';
+          codeConfig = await putOss(Client.fcClient, zipFilePath);
+          logger.debug(`upload oss: ${JSON.stringify(codeConfig)}`);
+        }
+
+        if (!code.endsWith('.zip')) {
+          codeVm.text = `remove file: ${zipFilePath}`;
+          fse.removeSync(zipFilePath);
+        }
+        codeVm.stop();
+      } catch (ex) {
+        codeVm.fail();
+        throw ex;
+      }
     }
 
-    const { data } = await Client.fcClient.publishLayerVersion(layerName, {
-      code: codeConfig,
-      description,
-      compatibleRuntime,
-    });
-    logger.debug(`arn: ${data?.arn}`);
+    const createVm = spinner('publish layer...');
+    try {
+      const { data } = await Client.fcClient.publishLayerVersion(layerName, {
+        code: codeConfig,
+        description,
+        compatibleRuntime,
+      });
+      logger.debug(`arn: ${data?.arn}`);
+      createVm.stop();
 
-    return data?.arn;
+      return data?.arn;
+    } catch (ex) {
+      createVm.fail();
+      throw ex;
+    }
   }
 
   async list({ prefix }, table) {
