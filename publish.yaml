@@ -1,8 +1,8 @@
 Type: Component
 Name: fc-layer
-Version: 0.0.13
+Version: 0.0.14
 Category: 基础云产品
-HomePage: 'https://github.com/devsapp/fc-layer'
+HomePage: "https://github.com/devsapp/fc-layer"
 Tags:
   - 基础云产品
 Description: 函数计算层的操作
@@ -18,7 +18,7 @@ Properties:
     Description: 地区
     Required: true
     Example: cn-shenzhen
-    Default: ''
+    Default: ""
     Type:
       - Enum:
           - cn-beijing
@@ -44,20 +44,20 @@ Properties:
     Description: 层名称
     Required: true
     Example: layer-name
-    Default: ''
+    Default: ""
     Type:
       - String
   description:
     Description: 层的描述
     Required: false
-    Example: ''
-    Default: ''
+    Example: ""
+    Default: ""
     Type:
       - String
   code:
     Description: 上传到层的代码路径
     Required: false
-    Example: ''
-    Default: ''
+    Example: ""
+    Default: ""
     Type:
       - String

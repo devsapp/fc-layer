@@ -64,6 +64,7 @@ export default class ComponentDemo extends BaseComponent {
     const {
       help,
       props,
+      parsedArgs,
     } = await this.handlerInputs(inputs, 'detail');
 
     if (help) {
@@ -72,7 +73,7 @@ export default class ComponentDemo extends BaseComponent {
     }
 
     const layer = new Layer();
-    return await layer.getVersion({ version: props.version, layerName: props.layerName });
+    return await layer.getVersion({ simple: parsedArgs?.data?.simple, version: props.version, layerName: props.layerName });
   }
 
   async versionConfig(inputs: InputProps) {
@@ -129,7 +130,7 @@ export default class ComponentDemo extends BaseComponent {
     logger.debug(`inputs.props: ${JSON.stringify(inputs.props)}`);
 
     const parsedArgs: { [key: string]: any } = core.commandParse(inputs, {
-      boolean: ['help', 'table', 'y'],
+      boolean: ['help', 'table', 'y', 'simple'],
       string: ['region', 'layer-name', 'code', 'description', 'compatible-runtime', 'prefix'],
       number: ['version-id'],
       alias: { help: 'h', 'assume-yes': 'y' },
