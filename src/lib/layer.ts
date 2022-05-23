@@ -153,8 +153,20 @@ export default class Layer {
     }
   }
 
-  async getVersion({ version, layerName }) {
-    return (await Client.fcClient.getLayerVersion(layerName, version))?.data;
+  async getVersion({ simple, version, layerName }: { layerName: string; version: any; simple?: boolean }) {
+    if (version === undefined || version === 'latest') {
+      const versionsConfig = await this.versions({ layerName }, false);
+      version = lodash.get(versionsConfig, '[0].version');
+      if (!version) {
+        throw new CatchableError(`Not fount ${layerName} for latest version`, 'The latest version may not exist, please try using Publish upload');
+      }
+    }
+
+    const layerConfig = (await Client.fcClient.getLayerVersion(layerName, version))?.data;
+    if (simple) {
+      return { arn: layerConfig.arn };
+    }
+    return layerConfig;
   }
 
   async deleteVersion({ version, layerName }) {
