@@ -5,13 +5,13 @@ import logger from '../common/logger';
 const getFileConfig = async (filePath) => {
   const { size } = await fse.stat(filePath);
   return {
-    size: size,
+    size,
     content: size > 52428800 ? undefined : await fse.readFile(filePath, 'base64'),
     zipFilePath: filePath,
-  }
-}
+  };
+};
 
-export async function zipCodeFile(codeUri): Promise<{ size: number, content?: string, zipFilePath: string }> {
+export async function zipCodeFile(codeUri): Promise<{ size: number; content?: string; zipFilePath: string }> {
   if (codeUri.endsWith('.zip')) {
     return await getFileConfig(codeUri);
   }

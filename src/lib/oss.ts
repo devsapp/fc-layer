@@ -4,7 +4,6 @@ import { got } from '@serverless-devs/core';
 import path from 'path';
 
 export const putOss = async (fcClient, zipFilePath) => {
-
   const { data: {
     ossRegion,
     credentials,
@@ -29,6 +28,6 @@ export const putOss = async (fcClient, zipFilePath) => {
     },
   });
   const ossObjectName = `${fcClient.accountid}/${objectName}`;
-  await client.put(ossObjectName, path.normalize(zipFilePath))
+  await client.put(ossObjectName, path.normalize(zipFilePath));
   return { ossBucketName: ossBucket, ossObjectName };
-}
+};
