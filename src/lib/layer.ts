@@ -2,7 +2,7 @@ import { lodash, CatchableError, spinner, downloadRequest, getRootHome, fse } fr
 import Table from 'tty-table';
 import path from 'path';
 import Client from './client';
-import { isUrl, zipCodeFile } from './make-code';
+import { zipCodeFile } from './make-code';
 import { IProps } from '../common/entity';
 import logger from '../common/logger';
 import inquirer from 'inquirer';
@@ -66,6 +66,8 @@ export default class Layer {
       compatibleRuntime = COMPATIBLE_RUNTIME,
     } = props;
     let codeConfig: any = {};
+    let publishLayerFunctionName = 'publishLayerVersion';
+    let removeZip;
 
     if (ossBucket || ossKey) {
       if (lodash.isNil(ossBucket) || lodash.isNil(ossKey)) {
@@ -77,43 +79,40 @@ export default class Layer {
     } else {
       const codeVm = spinner('zip code...');
       try {
-        const { size, content, zipFilePath } = await zipCodeFile(code);
+        const layerZipPayload = await zipCodeFile(code);
+        const { size, content, zipFilePath } = layerZipPayload;
+        removeZip = layerZipPayload.removeZip;
         if (size < 52428800) {
           logger.debug(`upload base64: ${size}`);
           codeConfig.zipFile = content;
         } else {
-          const { data: { CodeSizeLimit } } = await Client.fcClient.getAccountConfigs({ config: ['CodeSizeLimit'] });
-          if (size > CodeSizeLimit) {
-            throw new Error(`the size of file ${size} could not greater than ${CodeSizeLimit}`);
-          }
-          codeVm.text = 'push to oss...';
-          codeConfig = await putOss(Client.fcClient, zipFilePath);
-          logger.debug(`upload oss: ${JSON.stringify(codeConfig)}`);
-        }
-
-        if (!code.endsWith('.zip') || isUrl(code)) {
-          codeVm.text = `remove file: ${zipFilePath}`;
-          fse.removeSync(zipFilePath);
+          codeConfig.size = size;
+          codeConfig.zipFilePath = zipFilePath;
+          publishLayerFunctionName = 'publishLayerVersionForBigCode';
         }
         codeVm.stop();
       } catch (ex) {
         codeVm.fail();
+        removeZip?.();
         throw ex;
       }
     }
 
     const createVm = spinner('publish layer...');
     try {
-      const { data } = await Client.fcClient.publishLayerVersion(layerName, {
+      const { data } = await Client.fcClient[publishLayerFunctionName](layerName, {
         code: codeConfig,
+        codeConfig,
         description,
         compatibleRuntime,
       });
       logger.debug(`arn: ${data?.arn}`);
       createVm.stop();
+      removeZip?.();
 
       return data?.arn;
     } catch (ex) {
+      removeZip?.();
       createVm.fail();
       throw ex;
     }
