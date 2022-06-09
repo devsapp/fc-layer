@@ -6,7 +6,6 @@ import { zipCodeFile } from './make-code';
 import { IProps } from '../common/entity';
 import logger from '../common/logger';
 import inquirer from 'inquirer';
-import { putOss } from './oss';
 
 async function promptForConfirmOrDetails(message: string): Promise<boolean> {
   const answers: any = await inquirer.prompt([{
@@ -65,7 +64,7 @@ export default class Layer {
       ossKey,
       compatibleRuntime = COMPATIBLE_RUNTIME,
     } = props;
-    let codeConfig: any = {};
+    const codeConfig: any = {};
     let publishLayerFunctionName = 'publishLayerVersion';
     let removeZip;
 

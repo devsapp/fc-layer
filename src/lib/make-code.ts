@@ -9,7 +9,7 @@ const getFileConfig = async (filePath, removeZip) => {
     size,
     content: size > 52428800 ? undefined : await fse.readFile(filePath, 'base64'),
     zipFilePath: filePath,
-    removeZip: async () => removeZip ? await fse.removeSync(filePath) : '',
+    removeZip: async () => (removeZip ? await fse.removeSync(filePath) : ''),
   };
 };
 
