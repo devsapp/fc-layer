@@ -2,7 +2,7 @@ import { lodash, CatchableError, spinner, downloadRequest, getRootHome, fse } fr
 import Table from 'tty-table';
 import path from 'path';
 import Client from './client';
-import { zipCodeFile } from './make-code';
+import { isUrl, zipCodeFile } from './make-code';
 import { IProps } from '../common/entity';
 import logger from '../common/logger';
 import inquirer from 'inquirer';
@@ -91,7 +91,7 @@ export default class Layer {
           logger.debug(`upload oss: ${JSON.stringify(codeConfig)}`);
         }
 
-        if (!code.endsWith('.zip')) {
+        if (!code.endsWith('.zip') || isUrl(code)) {
           codeVm.text = `remove file: ${zipFilePath}`;
           fse.removeSync(zipFilePath);
         }
@@ -156,10 +156,10 @@ export default class Layer {
   async getVersion({ simple, version, layerName }: { layerName: string; version: any; simple?: boolean }) {
     if (version === undefined || version === 'latest') {
       const versionsConfig = await this.versions({ layerName }, false);
-      version = lodash.get(versionsConfig, '[0].version');
-      if (!version) {
+      if (!versionsConfig.length) {
         throw new CatchableError(`Not fount ${layerName} for latest version`, 'The latest version may not exist, please try using Publish upload');
       }
+      version = lodash.get(versionsConfig, `[${versionsConfig.length - 1}].version`);
     }
 
     const layerConfig = (await Client.fcClient.getLayerVersion(layerName, version))?.data;

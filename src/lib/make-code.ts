@@ -1,5 +1,6 @@
-import { zip, fse, getRootHome } from '@serverless-devs/core';
+import { zip, fse, getRootHome, downloadRequest } from '@serverless-devs/core';
 import path from 'path';
+import { v5 as uuidv5 } from 'uuid';
 import logger from '../common/logger';
 
 const getFileConfig = async (filePath) => {
@@ -11,7 +12,19 @@ const getFileConfig = async (filePath) => {
   };
 };
 
+export function isUrl(codeUri) {
+  return codeUri.startsWith('https://') || codeUri.startsWith('http://');
+}
+
+
 export async function zipCodeFile(codeUri): Promise<{ size: number; content?: string; zipFilePath: string }> {
+  if (isUrl(codeUri)) {
+    const localDir = path.join(getRootHome(), 'cache', 'layers');
+    const filename = `${uuidv5(codeUri, uuidv5.URL)}.zip`;
+    await downloadRequest(codeUri, localDir, { filename });
+    codeUri = path.join(localDir, filename);
+  }
+
   if (codeUri.endsWith('.zip')) {
     return await getFileConfig(codeUri);
   }
