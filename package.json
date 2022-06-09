@@ -35,7 +35,6 @@
   },
   "dependencies": {
     "@serverless-devs/core": "latest",
-    "ali-oss": "^6.17.1",
     "fs-extra": "^10.0.0",
     "inquirer": "^8.1.1",
     "js-yaml": "^4.0.0",
