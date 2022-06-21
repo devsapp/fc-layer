@@ -8,4 +8,4 @@ services:
       region: cn-shenzhen
       layerName: layer-test
       description: test-layer
-      code: ./src
+      code: ./src # 支持 http 和 https 协议
