@@ -104,10 +104,11 @@ export default class Layer {
     if (codeChecksum) {
       try {
         const versionConfig = await this.getVersion({ version: 'latest', layerName });
-        if (versionConfig.codeChecksum === codeChecksum) {
-          const { arnV2 } = versionConfig;
+        logger.debug(`local codeChecksum: ${codeChecksum}\nremote codeChecksum: ${versionConfig.codeChecksum}`);
+        if (versionConfig.codeChecksum === codeChecksum && lodash.isEqualWith(compatibleRuntime, versionConfig.compatibleRuntime)) {
+          const { arn } = versionConfig;
           logger.info('It is detected that the latest online version of codechecksum is consistent with the local version, skipping this deployment');
-          return arnV2;
+          return arn;
         }
       } catch (ex) {
         // 不影响主进程
