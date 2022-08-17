@@ -5,25 +5,25 @@ import logger from '../common/logger';
 import crc64 from 'crc64-ecma182.js';
 
 
-interface IZipPayload { 
-  size: number; 
-  content?: string; 
-  zipFilePath: string; 
-  codeChecksum?: string; 
+interface IZipPayload {
+  size: number;
+  content?: string;
+  zipFilePath: string;
+  codeChecksum?: string;
   removeZip: Function;
 }
 
 const getFileConfig = async (filePath, removeZip) => {
-  const codeChecksum: string = await new Promise(r => {
+  const codeChecksum: string = await new Promise((r) => {
     crc64.crc64File(filePath, (_err, data) => {
       r(data);
-    })
+    });
   });
 
   const { size } = await fse.stat(filePath);
   return {
     size,
-    codeChecksum, 
+    codeChecksum,
     content: size > 52428800 ? undefined : await fse.readFile(filePath, 'base64'),
     zipFilePath: filePath,
     removeZip: async () => (removeZip ? await fse.removeSync(filePath) : ''),
