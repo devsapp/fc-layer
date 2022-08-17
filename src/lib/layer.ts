@@ -67,6 +67,7 @@ export default class Layer {
     const codeConfig: any = {};
     let publishLayerFunctionName = 'publishLayerVersion';
     let removeZip;
+    let codeChecksum;
 
     if (ossBucket || ossKey) {
       if (lodash.isNil(ossBucket) || lodash.isNil(ossKey)) {
@@ -81,6 +82,7 @@ export default class Layer {
         const layerZipPayload = await zipCodeFile(code);
         const { size, content, zipFilePath } = layerZipPayload;
         removeZip = layerZipPayload.removeZip;
+        codeChecksum = layerZipPayload.codeChecksum;
         if (size < 52428800) {
           logger.debug(`upload base64: ${size}`);
           codeConfig.zipFile = content;
@@ -94,6 +96,22 @@ export default class Layer {
         codeVm.fail();
         removeZip?.();
         throw ex;
+      }
+    }
+
+    // 如果 codeChecksum 存在，则和线上进行对比，如果一致则不再上传
+    // https://github.com/devsapp/fc/issues/807
+    if (codeChecksum) {
+      try {
+        const versionConfig = await this.getVersion({ version: 'latest', layerName });
+        if (versionConfig.codeChecksum === codeChecksum) {
+          const { arnV2 } = versionConfig;
+          logger.info('It is detected that the latest online version of codechecksum is consistent with the local version, skipping this deployment');
+          return arnV2;
+        }
+      } catch (ex) {
+        // 不影响主进程
+        logger.debug(`Failed to compare Codes: ${ex.toString()}`);
       }
     }
 
