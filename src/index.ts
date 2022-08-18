@@ -1,12 +1,26 @@
 import * as core from '@serverless-devs/core';
-import BaseComponent from './common/base';
 import logger from './common/logger';
 import { InputProps, IProps } from './common/entity';
 import * as help_constant from './lib/help';
 import Layer from './lib/layer';
 import Client from './lib/client';
 
-export default class ComponentDemo extends BaseComponent {
+export default class ComponentDemo {
+  async acl(inputs: InputProps) {
+    const {
+      help,
+      props: { layerName, status },
+    } = await this.handlerInputs(inputs, 'acl');
+
+    if (help) {
+      core.help(help_constant.PUBLISH);
+      return;
+    }
+
+    const layer = new Layer();
+    return await layer.acl({ layerName, status });
+  }
+
   async publish(inputs: InputProps) {
     const {
       help,
@@ -19,20 +33,14 @@ export default class ComponentDemo extends BaseComponent {
     }
 
     const layer = new Layer();
-    const arn = await layer.publish(props);
-    super.__report({
-      name: 'fc-layer',
-      content: { arn, region: props.region },
-    });
-
-    return arn;
+    return await layer.publish(props);
   }
 
   async list(inputs: InputProps) {
     const {
       help,
-      props,
       table,
+      props: { prefix, status, official },
     } = await this.handlerInputs(inputs, 'list');
 
     if (help) {
@@ -41,7 +49,7 @@ export default class ComponentDemo extends BaseComponent {
     }
 
     const layer = new Layer();
-    return await layer.list({ prefix: props.prefix }, table);
+    return await layer.list({ prefix, status, official }, table);
   }
 
   async versions(inputs: InputProps) {
@@ -108,10 +116,6 @@ export default class ComponentDemo extends BaseComponent {
 
     const layer = new Layer();
     await layer.deleteLayer({ layerName: props.layerName, assumeYes: props.assumeYes });
-    super.__report({
-      name: 'fc-layer',
-      content: { arn: '', region: props.region },
-    });
   }
 
   async download(inputs: InputProps) {
@@ -130,7 +134,7 @@ export default class ComponentDemo extends BaseComponent {
     logger.debug(`inputs.props: ${JSON.stringify(inputs.props)}`);
 
     const parsedArgs: { [key: string]: any } = core.commandParse(inputs, {
-      boolean: ['help', 'table', 'y', 'simple'],
+      boolean: ['help', 'table', 'y', 'simple', 'public', 'official'],
       string: ['region', 'layer-name', 'code', 'description', 'compatible-runtime', 'prefix'],
       number: ['version-id'],
       alias: { help: 'h', 'assume-yes': 'y' },
@@ -171,6 +175,8 @@ export default class ComponentDemo extends BaseComponent {
       version,
       ossBucket: parsedData.ossBucket || props.ossBucket,
       ossKey: parsedData.ossKey || props.ossKey,
+      status: parsedData.public,
+      official: parsedData.official,
     };
 
     await Client.setFcClient(region, inputs.credentials, inputs.project?.access);

@@ -55,6 +55,11 @@ const tableShow = (data) => {
 };
 
 export default class Layer {
+  async acl({ layerName, status }: { layerName: string; status: boolean }) {
+    logger.debug(`layerName: ${layerName} ; public: ${status}`);
+    await Client.fcClient.request('PUT', `/layers/${layerName}/acl`, { public: status });
+  }
+
   async publish(props: IProps) {
     const {
       layerName,
@@ -105,11 +110,12 @@ export default class Layer {
         description,
         compatibleRuntime,
       });
-      logger.debug(`arn: ${data?.arn}`);
+      const arn = data?.arn;
+      logger.debug(`arn: ${arn}`);
       createVm.stop();
       removeZip?.();
 
-      return data?.arn;
+      return arn;
     } catch (ex) {
       removeZip?.();
       createVm.fail();
@@ -117,10 +123,10 @@ export default class Layer {
     }
   }
 
-  async list({ prefix }, table) {
+  async list({ prefix, status, official }, table) {
     logger.info('Getting layer list');
-    const list = await Client.fcClient.get_all_list_data('/layers', 'layers', { prefix });
-    logger.debug(`layer list: ${JSON.stringify(list)}`);
+    const list = await Client.fcClient.get_all_list_data('/layers', 'layers', { prefix, public: status, official });
+    logger.debug(`layer list: ${JSON.stringify(list, null, 2)}`);
 
     if (table) {
       tableShow(list);
@@ -130,8 +136,10 @@ export default class Layer {
         description,
         version,
         compatibleRuntime,
+        arnV2,
         arn,
-      }) => ({ layerName, arn, version, description, compatibleRuntime }));
+        acl,
+      }) => ({ layerName, arn, arnV2, version, acl, description, compatibleRuntime }));
     }
   }
 
@@ -146,8 +154,9 @@ export default class Layer {
         description,
         version,
         compatibleRuntime,
+        arnV2,
         arn,
-      }) => ({ layerName: ln, arn, version, description, compatibleRuntime }));
+      }) => ({ layerName: ln, arn, arnV2, version, description, compatibleRuntime }));
     }
   }
 
@@ -161,10 +170,12 @@ export default class Layer {
     }
 
     const layerConfig = (await Client.fcClient.getLayerVersion(layerName, version))?.data;
+
     if (simple) {
       return { arn: layerConfig.arn };
     }
     return layerConfig;
+    // return lodash.omit(layerConfig, ['arnV2']);
   }
 
   async deleteVersion({ version, layerName }) {
