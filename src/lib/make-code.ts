@@ -2,11 +2,28 @@ import { zip, fse, getRootHome, downloadRequest } from '@serverless-devs/core';
 import path from 'path';
 import { v5 as uuidv5 } from 'uuid';
 import logger from '../common/logger';
+import crc64 from 'crc64-ecma182.js';
+
+
+interface IZipPayload {
+  size: number;
+  content?: string;
+  zipFilePath: string;
+  codeChecksum?: string;
+  removeZip: Function;
+}
 
 const getFileConfig = async (filePath, removeZip) => {
+  const codeChecksum: string = await new Promise((r) => {
+    crc64.crc64File(filePath, (_err, data) => {
+      r(data);
+    });
+  });
+
   const { size } = await fse.stat(filePath);
   return {
     size,
+    codeChecksum,
     content: size > 52428800 ? undefined : await fse.readFile(filePath, 'base64'),
     zipFilePath: filePath,
     removeZip: async () => (removeZip ? await fse.removeSync(filePath) : ''),
@@ -18,7 +35,7 @@ function isUrl(codeUri = '') {
 }
 
 
-export async function zipCodeFile(codeUri): Promise<{ size: number; content?: string; zipFilePath: string; removeZip: Function }> {
+export async function zipCodeFile(codeUri): Promise<IZipPayload> {
   let removeZip = false;
   if (isUrl(codeUri)) {
     const localDir = path.join(getRootHome(), 'cache', 'layers');
