@@ -32,6 +32,8 @@ export interface IProps {
   prefix?: string;
   assumeYes?: boolean;
   version?: number;
+  status?: boolean;
+  official?: boolean;
 }
 export function isProps(args: any): args is IProps {
   return args && args.region && args.layerName;
