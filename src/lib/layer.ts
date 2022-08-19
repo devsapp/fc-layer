@@ -58,6 +58,17 @@ export default class Layer {
   async acl({ layerName, status }: { layerName: string; status: boolean }) {
     logger.debug(`layerName: ${layerName} ; public: ${status}`);
     await Client.fcClient.request('PUT', `/layers/${layerName}/acl`, { public: status });
+    if (status) {
+      logger.log(`
+Tips:
+  1. Layer cannot be used across regions
+  2. The public layer configuration ARN only supports V2 version
+`, 'yellow');
+
+      logger.success(`The ${layerName} setting was successfully exposed`);
+    } else {
+      logger.success(`Setting ${layerName} to private succeeded`);
+    }
   }
 
   async publish(props: IProps) {
