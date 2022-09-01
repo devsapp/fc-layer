@@ -174,7 +174,13 @@ Tips:
   }
 
   async versions({ layerName }, table) {
-    const versions = await Client.fcClient.get_all_list_data(`/layers/${layerName}/versions`, 'layers');
+    let versions = [];
+    let startVersion = 1;
+    do {
+      const res = await Client.fcClient.listLayerVersions(layerName, { startVersion });
+      startVersion = lodash.get(res, 'data.nextVersion', undefined);
+      versions = lodash.concat(versions, res.data?.layers);
+    } while (startVersion);
 
     if (table) {
       tableShow(versions);
@@ -196,7 +202,7 @@ Tips:
       if (!versionsConfig.length) {
         throw new CatchableError(`Not fount ${layerName} for latest version`, 'The latest version may not exist, please try using Publish upload');
       }
-      version = lodash.get(versionsConfig, `[${versionsConfig.length - 1}].version`);
+      version = lodash.maxBy(versionsConfig, 'version').version;
     }
 
     const layerConfig = (await Client.fcClient.getLayerVersion(layerName, version))?.data;
