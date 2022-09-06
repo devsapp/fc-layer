@@ -10,13 +10,14 @@ export default class ComponentDemo {
     const {
       help,
       props: { layerName, status },
-    } = await this.handlerInputs(inputs, 'acl');
+    } = await this.handlerInputs(inputs);
 
     if (help) {
       core.help(help_constant.PUBLISH);
       return;
     }
 
+    this.checkLayerNameEmpty(layerName);
     const layer = new Layer();
     return await layer.acl({ layerName, status });
   }
@@ -25,12 +26,13 @@ export default class ComponentDemo {
     const {
       help,
       props,
-    } = await this.handlerInputs(inputs, 'publish');
+    } = await this.handlerInputs(inputs);
 
     if (help) {
       core.help(help_constant.PUBLISH);
       return;
     }
+    this.checkLayerNameEmpty(props.layerName);
 
     const layer = new Layer();
     return await layer.publish(props);
@@ -41,7 +43,7 @@ export default class ComponentDemo {
       help,
       table,
       props: { prefix, status, official },
-    } = await this.handlerInputs(inputs, 'list');
+    } = await this.handlerInputs(inputs);
 
     if (help) {
       core.help(help_constant.LIST);
@@ -55,17 +57,17 @@ export default class ComponentDemo {
   async versions(inputs: InputProps) {
     const {
       help,
-      props,
+      props: { layerName },
       table,
-    } = await this.handlerInputs(inputs, 'versions');
+    } = await this.handlerInputs(inputs);
 
     if (help) {
       core.help(help_constant.VERSIONS);
       return;
     }
-
+    this.checkLayerNameEmpty(layerName);
     const layer = new Layer();
-    return await layer.versions({ layerName: props.layerName }, table);
+    return await layer.versions({ layerName }, table);
   }
 
   async detail(inputs: InputProps) {
@@ -73,15 +75,26 @@ export default class ComponentDemo {
       help,
       props,
       parsedArgs,
-    } = await this.handlerInputs(inputs, 'detail');
+    } = await this.handlerInputs(inputs);
 
     if (help) {
       core.help(help_constant.VERSION_CONFIG);
       return;
     }
 
+    const { version, layerName, arn } = props;
+    if (!arn) {
+      this.checkLayerNameEmpty(layerName);
+      this.checkVersionIdEmpty(version);
+    }
+
     const layer = new Layer();
-    return await layer.getVersion({ simple: parsedArgs?.data?.simple, version: props.version, layerName: props.layerName });
+    return await layer.getVersion({
+      simple: parsedArgs?.data?.simple,
+      version: props.version,
+      layerName: props.layerName,
+      arn: props.arn,
+    });
   }
 
   async versionConfig(inputs: InputProps) {
@@ -91,46 +104,56 @@ export default class ComponentDemo {
   async deleteVersion(inputs: InputProps) {
     const {
       help,
-      props,
-    } = await this.handlerInputs(inputs, 'deleteVersion');
+      props: { version, layerName },
+    } = await this.handlerInputs(inputs);
 
     if (help) {
       core.help(help_constant.DELETE_VERSION);
       return;
     }
 
+    this.checkLayerNameEmpty(layerName);
+    this.checkVersionIdEmpty(version);
+
     const layer = new Layer();
-    return await layer.deleteVersion({ version: props.version, layerName: props.layerName });
+    return await layer.deleteVersion({ version, layerName });
   }
 
   async deleteLayer(inputs: InputProps) {
     const {
       help,
-      props,
-    } = await this.handlerInputs(inputs, 'deleteLayer');
+      props: { layerName, assumeYes },
+    } = await this.handlerInputs(inputs);
 
     if (help) {
       core.help(help_constant.DELETE_LAYER);
       return;
     }
 
+    this.checkLayerNameEmpty(layerName);
+
     const layer = new Layer();
-    await layer.deleteLayer({ layerName: props.layerName, assumeYes: props.assumeYes });
+    await layer.deleteLayer({ layerName, assumeYes });
   }
 
   async download(inputs: InputProps) {
     const {
       help,
       props,
-    } = await this.handlerInputs(inputs, 'download');
-    const { version, layerName, region } = props;
+    } = await this.handlerInputs(inputs);
+    const { version, layerName, region, arn } = props;
     if (help) { return {}; }
 
+    if (!arn) {
+      this.checkLayerNameEmpty(layerName);
+      this.checkVersionIdEmpty(version);
+    }
+
     const layer = new Layer();
-    return await layer.download({ layerName, version, region });
+    return await layer.download({ arn, layerName, version, region });
   }
 
-  private async handlerInputs(inputs: InputProps, command: string) {
+  private async handlerInputs(inputs: InputProps) {
     logger.debug(`inputs.props: ${JSON.stringify(inputs.props)}`);
 
     const parsedArgs: { [key: string]: any } = core.commandParse(inputs, {
@@ -147,36 +170,28 @@ export default class ComponentDemo {
 
     const props = inputs.props || {};
     const region = parsedData.region || props.region;
-    if (!region) {
-      throw new Error('The parameter region was not found, please use --region to specify');
-    }
-    const layerName = parsedData['layer-name'] || props.layerName;
-    if (!layerName && command !== 'list') {
-      throw new Error('The parameter layerName was not found, please use --layer-name to specify');
-    }
+
+    this.checkRegionEmpty(region);
+
     let { compatibleRuntime } = props;
     if (parsedData['compatible-runtime']) {
       compatibleRuntime = parsedData['compatible-runtime'].split(',');
     }
 
-    const version = parsedData['version-id'] || props.version || props.versionId;
-    if (!version && (command === 'detail' || command === 'download')) {
-      throw new Error('The parameter version was not found, please use --version-id to specify');
-    }
-
     const endProps: IProps = {
       region,
-      layerName,
       compatibleRuntime,
+      layerName: parsedData['layer-name'] || props.layerName,
       description: parsedData.description || props.description,
       code: parsedData.code || props.code,
       prefix: parsedData.prefix || props.prefix,
       assumeYes: parsedData.y,
-      version,
+      version: parsedData['version-id'] || props.version || props.versionId,
       ossBucket: parsedData.ossBucket || props.ossBucket,
       ossKey: parsedData.ossKey || props.ossKey,
       status: parsedData.public,
       official: parsedData.official,
+      arn: parsedData.arn || props.arn,
     };
 
     await Client.setFcClient(region, inputs.credentials, inputs.project?.access);
@@ -186,5 +201,23 @@ export default class ComponentDemo {
       props: endProps,
       table: parsedData.table,
     };
+  }
+
+  private checkRegionEmpty(region: string) {
+    if (!region) {
+      throw new core.CatchableError('The parameter region was not found, please use --region to specify');
+    }
+  }
+
+  private checkLayerNameEmpty(layerName: string) {
+    if (!layerName) {
+      throw new core.CatchableError('The parameter layerName was not found, please use --layer-name to specify');
+    }
+  }
+
+  private checkVersionIdEmpty(version: number) {
+    if (!version) {
+      throw new core.CatchableError('The parameter version was not found, please use --version-id to specify');
+    }
   }
 }

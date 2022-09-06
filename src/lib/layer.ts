@@ -196,7 +196,13 @@ Tips:
     }
   }
 
-  async getVersion({ simple, version, layerName }: { layerName: string; version: any; simple?: boolean }) {
+  async getVersion(payload: { arn?: string; layerName: string; version: any; simple?: boolean }) {
+    let version = payload.version;
+    const { simple, layerName, arn } = payload;
+    if (!lodash.isEmpty(arn)) {
+      return (await Client.fcClient.get(`/layerarn/${encodeURIComponent(arn)}`))?.data;
+    }
+
     if (version === undefined || version === 'latest') {
       const versionsConfig = await this.versions({ layerName }, false);
       if (!versionsConfig.length) {
@@ -237,8 +243,14 @@ Tips:
     }
   }
 
-  async download({ version, layerName, region }) {
-    if (lodash.isNil(version) || lodash.isNil(layerName)) {
+  async download(payload) {
+    let { version, layerName } = payload;
+    const { arn, region } = payload;
+    if (arn) {
+      const c = this.getLayerVersion(arn);
+      version = c.version;
+      layerName = c.layerName;
+    } else if ((lodash.isNil(version) || lodash.isNil(layerName))) {
       throw new CatchableError('Down load layer version and layerName is must');
     }
 
@@ -250,7 +262,7 @@ Tips:
       return localPath;
     }
 
-    const { code } = await this.getVersion({ version, layerName });
+    const { code } = await this.getVersion({ arn, version, layerName });
     const codeUrl = code.location.replace('-internal.aliyuncs.com', '.aliyuncs.com');
     await downloadRequest(codeUrl, localDir, { filename });
     return localPath;
@@ -260,5 +272,19 @@ Tips:
     for (const { version } of versions) {
       await this.deleteVersion({ version, layerName });
     }
+  }
+
+  private getLayerVersion(arn: string) {
+    if (lodash.includes(arn, '#')) {
+      const [, layerName, version] = lodash.split(arn, '#');
+      return { layerName, version };
+    }
+
+    if (lodash.includes(arn, '/')) {
+      const [, layerName, , version] = lodash.split(arn, '/');
+      return { layerName, version };
+    }
+
+    return {};
   }
 }
