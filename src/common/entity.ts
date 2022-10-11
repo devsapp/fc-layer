@@ -22,6 +22,7 @@ export interface InputProps {
 }
 
 export interface IProps {
+  arn?: string;
   region: string;
   ossKey?: string;
   ossBucket?: string;
