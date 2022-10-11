@@ -169,7 +169,7 @@ Tips:
         arnV2,
         arn,
         acl,
-      }) => ({ layerName, arn, arnV2, version, acl, description, compatibleRuntime }));
+      }) => ({ layerName, arn: arnV2 || arn, version, acl, description, compatibleRuntime }));
     }
   }
 
@@ -192,7 +192,7 @@ Tips:
         compatibleRuntime,
         arnV2,
         arn,
-      }) => ({ layerName: ln, arn, arnV2, version, description, compatibleRuntime }));
+      }) => ({ layerName: ln, arn: arnV2 || arn, version, description, compatibleRuntime }));
     }
   }
 
@@ -214,10 +214,12 @@ Tips:
     const layerConfig = (await Client.fcClient.getLayerVersion(layerName, version))?.data;
 
     if (simple) {
-      return { arn: layerConfig.arn };
+      return { arn: layerConfig.arnV2 || layerConfig.arn };
     }
-    return layerConfig;
-    // return lodash.omit(layerConfig, ['arnV2']);
+    if (layerConfig.arnV2) {
+      layerConfig.arn = layerConfig.arnV2;
+    }
+    return lodash.omit(layerConfig, ['arnV2']);
   }
 
   async deleteVersion({ version, layerName }) {
