@@ -1,11 +1,14 @@
 edition: 1.0.0        #  命令行YAML规范版本，遵循语义化版本（Semantic Versioning）规范
 name: component-test   #  项目名称
+access: default-1
 
 services:
   component-test: #  服务名称
     component: ${path(..)}  # 这里引入的是相对路径，正式配置替换成你自己的component名称即可 
     props:
-      region: cn-shenzhen
-      layerName: layer-test
-      description: test-layer
+      region: cn-huhehaote
+      # layerName: python39_fc_auto_created
+      # description: test-layer
       code: ./src # 支持 http 和 https 协议
+      arn: 57bbf06269f73c18099ca76b3f7214f0#python39_fc_auto_created#1
+      # arn: acs:fc:cn-huhehaote:official:layers/Nodejs-Puppeteer17x/versions/1

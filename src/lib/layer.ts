@@ -197,7 +197,7 @@ Tips:
   }
 
   async getVersion(payload: { arn?: string; layerName: string; version: any; simple?: boolean }) {
-    let version = payload.version;
+    let { version } = payload;
     const { simple, layerName, arn } = payload;
     if (!lodash.isEmpty(arn)) {
       return (await Client.fcClient.get(`/layerarn/${encodeURIComponent(arn)}`))?.data;
