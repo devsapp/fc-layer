@@ -7,13 +7,12 @@ import crc64 from 'crc64-ecma182.js';
 
 interface IZipPayload {
   size: number;
-  content?: string;
   zipFilePath: string;
   codeChecksum?: string;
   removeZip: Function;
 }
 
-const getFileConfig = async (filePath, removeZip) => {
+const getFileConfig = async (filePath, removeZip): Promise<IZipPayload> => {
   const codeChecksum: string = await new Promise((r) => {
     crc64.crc64File(filePath, (_err, data) => {
       r(data);
@@ -24,7 +23,6 @@ const getFileConfig = async (filePath, removeZip) => {
   return {
     size,
     codeChecksum,
-    content: size > 52428800 ? undefined : await fse.readFile(filePath, 'base64'),
     zipFilePath: filePath,
     removeZip: async () => (removeZip ? await fse.removeSync(filePath) : ''),
   };
@@ -65,6 +63,5 @@ export async function zipCodeFile(codeUri): Promise<IZipPayload> {
     outputFileName,
   });
 
-  const fileConfig = await getFileConfig(zipFilePath, true);
-  return fileConfig;
+  return await getFileConfig(zipFilePath, true);
 }
