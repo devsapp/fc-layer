@@ -81,7 +81,6 @@ Tips:
       compatibleRuntime = COMPATIBLE_RUNTIME,
     } = props;
     const codeConfig: any = {};
-    let publishLayerFunctionName = 'publishLayerVersion';
     let removeZip;
     let codeChecksum;
 
@@ -96,17 +95,11 @@ Tips:
       const codeVm = spinner('zip code...');
       try {
         const layerZipPayload = await zipCodeFile(code);
-        const { size, content, zipFilePath } = layerZipPayload;
+        const { size, zipFilePath } = layerZipPayload;
         removeZip = layerZipPayload.removeZip;
         codeChecksum = layerZipPayload.codeChecksum;
-        if (size < 52428800) {
-          logger.debug(`upload base64: ${size}`);
-          codeConfig.zipFile = content;
-        } else {
-          codeConfig.size = size;
-          codeConfig.zipFilePath = zipFilePath;
-          publishLayerFunctionName = 'publishLayerVersionForBigCode';
-        }
+        codeConfig.size = size;
+        codeConfig.zipFilePath = zipFilePath;
         codeVm.stop();
       } catch (ex) {
         codeVm.fail();
@@ -134,7 +127,7 @@ Tips:
 
     const createVm = spinner('publish layer...');
     try {
-      const { data } = await Client.fcClient[publishLayerFunctionName](layerName, {
+      const { data } = await Client.fcClient.publishLayerVersionForBigCode(layerName, {
         code: codeConfig,
         codeConfig,
         description,
