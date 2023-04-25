@@ -1,10 +1,21 @@
 import Layer from "../../src/lib/layer";
 import Client from "../../src/lib/client";
+// @ts-ignore
+import './mock-oss-client';
+import MockedOssClient from 'ali-oss';
 
 describe('publish', function () {
+    beforeEach(() => {
+        new MockedOssClient().put('example.txt', './non-exists.txt');
+    });
+
     it('should work with Layer-FC plugins\' output', async () => {
         let region = "cn-shenzhen";
-        await Client.setFcClient(region, null, "default");
+        let fc = await Client.setFcClient(region, null, "default");
+
+        let expectedArn = "dcd6a873f4f5adf7ad3375ddac7171ec#layer#1";
+        jest.spyOn(fc, 'publishLayerVersion')
+            .mockReturnValue({data: {arn: expectedArn}});
 
         let layer = new Layer();
 
@@ -37,7 +48,7 @@ describe('publish', function () {
                     "ossKey": "node-v16.14.2-linux-x64.zip"
                 }
             );
-            expect(arn).toBeDefined();
+            expect(arn).toBe(expectedArn);
         } catch (e) {
             fail(e);
         }
