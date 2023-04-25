@@ -21,3 +21,4 @@ lib
 !s-zip/src
 **/nas-server/dist
 !**/nas-server/lib
+!test/lib
