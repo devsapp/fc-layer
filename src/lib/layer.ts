@@ -80,7 +80,7 @@ Tips:
       ossKey,
       compatibleRuntime = COMPATIBLE_RUNTIME,
     } = props;
-    const codeConfig: any = {};
+    const codeConfig: any = {}; // fixme: missing zipFilePath
     let removeZip;
     let codeChecksum;
 

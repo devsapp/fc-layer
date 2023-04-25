@@ -9,7 +9,7 @@ export default {
   collectCoverage: false,
   preset: 'ts-jest',
   testEnvironment: 'node',
-  testMatch: ['**/test/*.test.ts'],
+  testMatch: ['**/test/**/*.test.ts'],
   // testPathIgnorePatterns: ['./test/fixtures'],
   setupFilesAfterEnv: ['./jest.setup.ts'],
 };
