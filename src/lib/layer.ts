@@ -127,7 +127,8 @@ Tips:
 
     const createVm = spinner('publish layer...');
     try {
-      const { data } = await Client.fcClient.publishLayerVersionForBigCode(layerName, {
+      const funName = ossBucket ? 'publishLayerVersion' : 'publishLayerVersionForBigCode';
+      const { data } = await Client.fcClient[funName](layerName, {
         code: codeConfig,
         codeConfig,
         description,
